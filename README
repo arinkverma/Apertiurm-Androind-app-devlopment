@@ -1,0 +1,8 @@
+Apertium on your mobile
+----------------------------
+
+Port Apertium to Android and possibly iPhone. Apertium has a Java port which doesn't currently work on mobile telephones. Lots of people have mobile telephones, and some of them would like to have a translator there.
+
+
+It is at demo app, developed using Apertium java port.
+It is a standalone apk file which translate Esperanto to English.
