@@ -1,0 +1,11 @@
+lt-proc /sdcard/apertium/eo-en/en-eo.automorf.bin |
+apertium-tagger -g $2 /sdcard/apertium/eo-en/en-eo.prob |
+apertium-pretransfer|
+apertium-transfer -n /sdcard/apertium/eo-en/eo-en.en-eo.genitive.t1x  /sdcard/apertium/eo-en/en-eo.genitive.t1x.bin |
+apertium-transfer /sdcard/apertium/eo-en/eo-en.en-eo.t1x  /sdcard/apertium/eo-en/en-eo.t1x.bin  /sdcard/apertium/eo-en/en-eo.autobil.bin |
+apertium-interchunk /sdcard/apertium/eo-en/eo-en.en-eo.antaux_t2x  /sdcard/apertium/eo-en/en-eo.antaux_t2x.bin |
+apertium-interchunk /sdcard/apertium/eo-en/eo-en.en-eo.antaux2_t2x  /sdcard/apertium/eo-en/en-eo.antaux2_t2x.bin |
+apertium-interchunk /sdcard/apertium/eo-en/eo-en.en-eo.t2x  /sdcard/apertium/eo-en/en-eo.t2x.bin |
+apertium-postchunk /sdcard/apertium/eo-en/eo-en.en-eo.t3x  /sdcard/apertium/eo-en/en-eo.t3x.bin |
+lt-proc $1 /sdcard/apertium/eo-en/en-eo.autogen.bin 
+  
