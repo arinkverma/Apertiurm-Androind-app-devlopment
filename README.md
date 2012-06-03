@@ -10,7 +10,7 @@ Features [version 2.2.2]
 <li>Share intent</li>
 <li>Installation of language pair from local directory</li>
 <li>Language list view</li>
-
+</ul>
 
 Technical approach
 ========
