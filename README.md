@@ -35,7 +35,7 @@ Structure of <b>Install.json</b>
 	}			
 }}
 </pre>
-<a href="https://github.com/downloads/arinkverma/Apertiurm-Androind-app-devlopment/eo-en.zip" >Download dummy Language pair package (en-eo)</a> <br/>
+<a href="https://github.com/arinkverma/Apertiurm-Androind-app-devlopment/blob/2.2.2/LanguagePairs/android-eo-en.zip?raw=true" >Download dummy Language pair package (en-eo)</a> <br/>
 [Note : It is en-eo language translation]
 
 </li>
