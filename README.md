@@ -3,7 +3,7 @@ Apertium on your mobile
 Port Apertium to Android and possibly iPhone. Apertium has a Java port which doesn't currently work on mobile telephones. Lots of people have mobile telephones, and some of them would like to have a translator there.
 
 
-Features [version 2.2.1]
+Features [version 2.2.2]
 =========
 Share intent
 Installation of language pair from local directory
@@ -18,16 +18,20 @@ For basic feature
 <ol>
 <li>Language pair
 <ul>
-<li>For language pair is I have used a zip-compress file which include Install.xml in root. Install.xml contains information about installation and language pairs.
+<li>For language pair is I have used a zip-compress file which include Install.json in root. Install.xml contains information about installation and language pairs.
 <br/>
-Structure of <b>Install.xml</b>
+Structure of <b>Install.json</b>
 <pre>
-&lt;install>
-&lt;mode12>a-b&lt;/mode12>
-&lt;mode21>b-a&lt;/mode21>
-&lt;lang12>LanguageA-LanguageB&lt;/lang12>
-&lt;lang21>LanguageB-Languagea&lt;/lang21>
-&lt;/install>
+{"pair": {
+	"id":"eo-en",
+	"version" : "2.0.13",
+	"modes": {
+		"modeitem" : [
+			{"id" : "eo-en", "title" : "Esperanto-English"},
+			{"id" : "en-eo", "title" : "English-Esperanto"}
+		]
+	}			
+}}
 </pre>
 <a href="https://github.com/downloads/arinkverma/Apertiurm-Androind-app-devlopment/eo-en.zip" >Download dummy Language pair package (en-eo)</a> <br/>
 [Note : It is en-eo language translation]
