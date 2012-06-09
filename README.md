@@ -21,11 +21,11 @@ Features [version 2.3]
 ![Alt cache](http://3.bp.blogspot.com/-TQSJ5wlu5Xg/T9POYjybQEI/AAAAAAAAAtw/dDTTj9jlMtY/s1600/device-2012-06-10-030505.png "Cache in setting")
 	<ul>
 <li>The cache feature developed by <a href="http://wiki.apertium.org/wiki/User:Mikel/GSoC_2012_Application">Mikel</a> on lttoolbox, has been added to application</li>
-<li>This make subseticent translation instaneously fast</li>
+<li>This make subsequent translation instantaneously</li>
 <li>Can easliy be enable/disable from setting panel</li>
 </ul>
 
-New setting panel<br />
+<b>New setting panel</b><br />
 In earlier version there was absence of standard setting panel
 
 Technical approach
