@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <EditText
+        android:id="@+id/inputtext"
+        android:layout_width="fill_parent"
+        android:layout_height="120dp"
+        android:layout_weight="0.5"
+        android:inputType="text|textMultiLine"
+        android:text="@string/inputtext" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <Button
+            android:id="@+id/translateButton"
+            android:layout_width="192dp"
+            android:layout_height="wrap_content"
+            android:text="@string/translateButton" />
+
+        <Button
+            android:id="@+id/modeButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/language" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/outputtext"
+        android:layout_width="fill_parent"
+        android:layout_height="120dp"
+        android:layout_weight="0.5"
+        android:inputType="text|textMultiLine"
+        android:text="" />
+
+</LinearLayout>
