@@ -5,21 +5,18 @@
 
 package org.apertium.android.helper;
 
-import org.apertium.android.DB.DatabaseHandler;
-import org.apertium.android.languagepair.TranslationMode;
-
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Environment;
 
 
 public class AppPreference   {
-	private static final String PREFS_NAME = "Apertium.Pref";
+	private static final String PREFS_NAME = "ore.apertium.Pref";
 	private static final String base_dir = Environment.getExternalStorageDirectory().toString() +"/apertium";
 	private static final String temp_dir  = Environment.getExternalStorageDirectory().toString() +"/apertium/temp";
 	private static final String version = "2.0.1";
 	private static final String _RulePackage = "org.apertium.android.rule";
-	private static final String _CurrentMode = "currentmode";
+	private static boolean _isCacheEnabled = false;
+	private static String _SVNaddress = "Nothing has been entered";
+	
 	
 //Package file name = <Base_Dir><Package Name><PackageExtention>
 	private static final String _PackageExtention = ".zip";
@@ -44,53 +41,26 @@ public class AppPreference   {
 		return _RulePackage;
 	}
 	
-	public static String CurrentMode(Context ctx){
-		SharedPreferences settings = ctx.getSharedPreferences(PREFS_NAME, 0);
-		String mode = settings.getString(_CurrentMode, "??-??" );
-		return mode;
-	}
-	
-	public static  void setCurrentMode(Context ctx,String mode){
-		SharedPreferences settings = ctx.getSharedPreferences(PREFS_NAME, 0);
-		SharedPreferences.Editor editor = settings.edit();
-	    editor.putString(_CurrentMode, mode);
-	    // Commit the edits!
-	    editor.commit();
-	}
-	
-	public static  void resetCurrentMode(Context ctx){
-		SharedPreferences settings = ctx.getSharedPreferences(PREFS_NAME, 0);
-		SharedPreferences.Editor editor = settings.edit();
-	    editor.putString(_CurrentMode, "??-??");
-	    // Commit the edits!
-	    editor.commit();
-	}
-	
-	public static boolean isSetCurrentMode(Context ctx){
-		SharedPreferences settings = ctx.getSharedPreferences(PREFS_NAME, 0);
-		String mode = settings.getString(_CurrentMode, "??-??" );
-		
-		if(mode.equals("??-??")){
-			return false;
-		}		
-		return true;		
-	}
-	
-	public static  String CurrentPackage(Context ctx){
-		SharedPreferences settings = ctx.getSharedPreferences(PREFS_NAME, 0);
-		String mode = settings.getString(_CurrentMode, "??-??" );
-		if(mode.equals("??-??")){
+	public static  String PackagePath(String PackageID){
+		if(PackageID==null){
 			return null;
 		}
-		DatabaseHandler DB = new DatabaseHandler(ctx);
-		TranslationMode m = DB.getMode(mode);
-		return m.getPackage();
+		return base_dir+"/"+PackageID+ _PackageExtention;
 	}
 	
-	public static  String PathCurrentPackage(Context ctx){
-		if(CurrentPackage(ctx)==null){
-			return null;
-		}
-		return base_dir+"/"+CurrentPackage(ctx)+ _PackageExtention;
+	public static void setCacheEnabled(boolean y){
+		_isCacheEnabled = y;
+	}
+	
+	public static boolean isCacheEnabled(){
+		return _isCacheEnabled;
+	}
+	
+	public static void setSVN(String y){
+		_SVNaddress = y;
+	}
+	
+	public static String getSVN(){
+		return _SVNaddress;
 	}
 }

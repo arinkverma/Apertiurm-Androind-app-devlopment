@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+        <PreferenceCategory
+                android:title="Language Package">
+                
+         <Preference
+         		android:title="List Package"
+                android:summary="Select/Remove installed packages"
+                android:key="listPref" />
+              		
+         
+         
+        <PreferenceScreen
+               android:title="Install Package"
+         		android:summary="Install/Update new package"
+         		android:key="installPref" >
+                <Preference
+                        android:name="Install from SVN"
+                        android:summary="Download and Install directly from SVN"
+                        android:title="Install from SVN"
+                        android:key="installSVNPref" />
+                
+                 <Preference
+                        android:name="Install from Local"
+                        android:summary="Install localy downloaded package"
+                        android:title="Install from Local"
+                        android:key="installLocalPref" />
+        
+        </PreferenceScreen>
+         
+         
+        </PreferenceCategory>
+        <PreferenceCategory
+                android:title="Application Setting">
+		<CheckBoxPreference
+		        android:title="Cache Enable"
+		        android:defaultValue="false"
+		        android:summary="For quick translation enable"
+		        android:key="CachePref" />
+        <EditTextPreference
+                android:name="SVN address"
+                android:summary="Enter the address of language list on SVN"
+                android:defaultValue="Nothing"
+                android:title="SVN address"
+                android:key="SVNPref" />
+
+        
+        <Preference
+                android:title="Widget Settings"
+                android:summary="Widgets such as shortcut for specific language"
+                android:key="WidgetPref" />
+        
+        </PreferenceCategory>
+
+</PreferenceScreen>

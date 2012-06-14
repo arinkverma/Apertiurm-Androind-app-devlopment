@@ -6,13 +6,14 @@
 package org.apertium.android;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 
+import org.apertium.Translator;
 import org.apertium.android.DB.DatabaseHandler;
 import org.apertium.android.filemanager.FileChooserActivity;
 import org.apertium.android.filemanager.FileManager;
 import org.apertium.android.helper.AppPreference;
+import org.apertium.android.helper.RulesHandler;
 import org.apertium.android.languagepair.TranslationMode;
 
 import android.app.AlertDialog;
@@ -23,6 +24,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -38,16 +40,28 @@ import android.widget.Toast;
 public class ModeManageActivity extends ListActivity {
 	private DatabaseHandler DB;
 	
+	//Rules Manager
+	private RulesHandler rulesHandler;
+	
 	/* List of installed modes*/
 	private List<TranslationMode> L;
 	private static ProgressDialog progressDialog;
 	private static String packagetoRemove;
+	private String PrefToSet = null;
 
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
+	    
+	    Intent intent = getIntent();
+		Bundle extras = intent.getExtras();
+	    if (extras != null) {
+	    	PrefToSet = extras.getString("PrefToSet");
+		}
+	    
 		DB = new DatabaseHandler(this.getBaseContext());
+		rulesHandler = new RulesHandler(this.getBaseContext());
 	    L = DB.getAllModes();
 	    int len = L.size();
 	    final String[] ModeTitle = new String[len];
@@ -58,8 +72,6 @@ public class ModeManageActivity extends ListActivity {
 	    	ModeTitle[i] = m.getTitle();
 	        ModeId[i] 	= m.getID();
 	    }
-	    
-	    Arrays.sort(ModeTitle);
 	    
 	    ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, android.R.id.text1, ModeTitle);
 
@@ -76,7 +88,7 @@ public class ModeManageActivity extends ListActivity {
 			public void onItemClick(AdapterView<?> parent, View view, int position,long id) {
 				TextView v = (TextView) view;
 				Toast.makeText(getApplicationContext(), v.getText(),   Toast.LENGTH_SHORT).show();
-				AppPreference.setCurrentMode(getApplicationContext(),ModeId[position]);
+				UpdateMode(ModeId[position]);
 			    finish();
 			}
 	    });
@@ -88,19 +100,19 @@ public class ModeManageActivity extends ListActivity {
 	            final AlertDialog.Builder b = new AlertDialog.Builder(ModeManageActivity.this);
 	            b.setIcon(android.R.drawable.ic_dialog_alert);
 	           
-	            TranslationMode tobeRemove = DB.getMode(ModeId[pos]);
-	           
-	            
-	            if(tobeRemove.getPackage().equals(AppPreference.CurrentPackage(getApplicationContext()))){
-	            	AppPreference.resetCurrentMode(getApplicationContext());	            	
-	            }
+	            final TranslationMode tobeRemove = DB.getMode(ModeId[pos]);
 	            
 	            final String pack = tobeRemove.getPackage();
 	            b.setMessage("Are you sure want to remove this package?");
 	            b.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 	                    public void onClick(DialogInterface dialog, int whichButton) {
 	                    	packagetoRemove = pack;
-	                    	run0();			        		
+	                    	
+	                    	run0();			 
+	                    	
+	        	            if(tobeRemove.getPackage().equals(rulesHandler.getCurrentPackage())){
+	        	            	rulesHandler.resetCurrentMode();	            	
+	        	            }
 	                    }
 	            });
 	            b.setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -115,8 +127,6 @@ public class ModeManageActivity extends ListActivity {
 	        }
 	    });
 			
-
-	 
 	}
 	
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -193,9 +203,34 @@ public class ModeManageActivity extends ListActivity {
 	        }
 	    }
 	};
+	
+	
+	
+	private void UpdateMode(String MODE){		
+		if(PrefToSet !=null ){
+			Intent intent = getIntent();
+		    intent.putExtra("Mode", MODE);
+		    setResult(RESULT_OK, intent);
+			Log.i("CurrentMode", MODE);
+		}else{
+	    	try {
+	    		rulesHandler.setCurrentMode(MODE);	
+				Translator.setBase(rulesHandler.getClassLoader());
+				Translator.setCacheEnabled(AppPreference.isCacheEnabled());
+				Translator.setMode(MODE);
+				Log.e("CurrentMode",rulesHandler.getCurrentMode());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}	
+		}
+	}
 
 	
-	
-	
-
+	@Override
+    public void onBackPressed(){
+		Intent intent = getIntent();
+	    intent.putExtra("Mode", "+");
+	    setResult(RESULT_CANCELED, intent);
+	    finish();	
+    }
 }

@@ -13,14 +13,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
-import org.apertium.android.R;
 import org.apertium.android.DB.DatabaseHandler;
 import org.apertium.android.filemanager.FileManager;
-import org.apertium.android.helper.ConfigManager;
 import org.apertium.android.helper.AppPreference;
-import org.apertium.android.languagepair.TranslationMode;
+import org.apertium.android.helper.ConfigManager;
 import org.apertium.android.languagepair.LanguagePackage;
-import org.apertium.android.languagepair.TranslationRules;
+import org.apertium.android.languagepair.TranslationMode;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -34,10 +32,11 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 public class InstallActivity extends Activity implements OnClickListener {
+	
+	private final String TAG = "InstallActivity";
 
 	//Buttons
 	private Button _submitButton,_cancelButton;
@@ -48,7 +47,6 @@ public class InstallActivity extends Activity implements OnClickListener {
 	private LanguagePackage pack;
 	private List<TranslationMode> translationModes;
 	private String path = "-1";
-	private String filename = "-1";
 	
 	//Action to be perform
 	private enum Action  {install,update,discard};
@@ -76,11 +74,13 @@ public class InstallActivity extends Activity implements OnClickListener {
 			Info1.append("Ver: "+config.Version()+"\n");
 			
 		} catch (IOException e1) {
-			Info1.append("IO error"+e1);
+			Log.e(TAG,e1.getMessage());
 		} catch (JSONException e1) {
 			Info1.append("Error in config file "+e1);
+			Log.e(TAG,"Error in config file "+e1.getMessage());
 		}catch (Exception e1) {
 			Info1.append("Error in config file "+e1);
+			Log.e(TAG,"Error in config file "+e1.getMessage());
 		}
 		
 		
@@ -126,15 +126,14 @@ public class InstallActivity extends Activity implements OnClickListener {
 		Log.i("InstallActivity.InitView","Started");
 	    Bundle extras = getIntent().getExtras();
 	    path = extras.getString("filepath");
-	    filename = extras.getString("filename");
 		DB = new DatabaseHandler(this.getBaseContext());
-	    setContentView(R.layout.install);
+	    setContentView(R.layout.install_package);
 		Heading1 = (TextView) findViewById(R.id.textView1);
 		Info1 = (TextView) findViewById(R.id.textView2);
-		Heading2 = (TextView) findViewById(R.id.TextView01);
-		Info2 = (TextView) findViewById(R.id.TextView02);
-		_submitButton = (Button) findViewById(R.id.button1);
-		_cancelButton = (Button) findViewById(R.id.button2);
+		Heading2 = (TextView) findViewById(R.id.textView3);
+		Info2 = (TextView) findViewById(R.id.textView4);
+		_submitButton = (Button) findViewById(R.id.installButton);
+		_cancelButton = (Button) findViewById(R.id.discardButton);
 
 		Heading1.setText("Package");
 		Info1.setText(path);

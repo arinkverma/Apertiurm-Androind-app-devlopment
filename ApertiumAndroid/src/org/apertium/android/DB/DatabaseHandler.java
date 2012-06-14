@@ -84,7 +84,7 @@ public class DatabaseHandler {
         List<TranslationMode> LangList = new ArrayList<TranslationMode>();
         
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + TABLE_MODE;
+        String selectQuery = "SELECT  * FROM " + TABLE_MODE + " ORDER BY "+KEY_MODE_TITLE+" ASC";
     	
         Cursor cursor = db.rawQuery(selectQuery, null);
      

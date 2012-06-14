@@ -2,74 +2,110 @@
  *
  * @author Arink Verma
  */
-
 package org.apertium.android;
 
 import org.apertium.android.filemanager.FileChooserActivity;
+import org.apertium.android.helper.AppPreference;
+import org.apertium.android.widget.WidgetConfigActivity;
 
-import android.app.ListActivity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-
-
-public class ManageActivity extends ListActivity {
-	
-	//List menu items
-	private String[] Menu = {"Language Pairs","Install New Pair","Preferences"};
-	
-	/** Called when the activity is first created. */
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-	    super.onCreate(savedInstanceState);	    
-	    ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, android.R.id.text1, Menu);
-	    this.setListAdapter(adapter);
-	    ListView lv = getListView();
-	    lv.setTextFilterEnabled(true);
-	    lv.setOnItemClickListener(new OnItemClickListener() {
-			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position,long id) {
-				switch(position){
-					case 0:			 
-						//Start ModeManage Activity
-						ManageActivity.this.startActivity(new Intent(ManageActivity.this,ModeManageActivity.class));
-						break;
-					case 1:			
-						//TODO Option to download from Internet
-						//Start FileChooser Activity
-						ManageActivity.this.startActivity(new Intent(ManageActivity.this,FileChooserActivity.class));
-						break;
-				}
-
-			}
-	    });
-	}
-	
-	public boolean onCreateOptionsMenu(Menu menu) {
-	      MenuInflater inflater = getMenuInflater();
-	      inflater.inflate(R.menu.manage_menu, menu);
-	      return true;
-	 }
-	
-	public boolean onOptionsItemSelected(MenuItem item) {
-	      switch (item.getItemId()) {
-	      case R.id.install:
-	    	  Intent myIntent = new Intent(this, FileChooserActivity.class);
-	    	  ManageActivity.this.startActivity(myIntent);
-	    	  return true;
-	      default:
-	            return super.onOptionsItemSelected(item);
-	      }
-	}
-	
-	
-	
-
+import android.preference.Preference;
+import android.preference.Preference.OnPreferenceClickListener;
+import android.preference.PreferenceActivity;
+import android.preference.PreferenceManager;
+import android.util.Log;
+import android.widget.Toast;
+ 
+public class ManageActivity extends PreferenceActivity {
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+                super.onCreate(savedInstanceState);
+                addPreferencesFromResource(R.xml.setting);
+                
+                
+                /*List Package*/
+				Preference listPref = (Preference) findPreference("listPref");
+				listPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            		public boolean onPreferenceClick(Preference preference) {
+            			Intent myIntent1 = new Intent(ManageActivity.this, ModeManageActivity.class);
+            			ManageActivity.this.startActivity(myIntent1);
+                        return true;
+                    }
+				});
+				
+				/*Install Package*/
+                Preference installLocalPref = (Preference) findPreference("installLocalPref");
+                installLocalPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            		public boolean onPreferenceClick(Preference preference) {
+            			Intent myIntent1 = new Intent(ManageActivity.this, FileChooserActivity.class);
+            			ManageActivity.this.startActivity(myIntent1);
+                        return true;
+                    }
+                });
+                
+                Preference installSVNPref = (Preference) findPreference("installSVNPref");
+                installSVNPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            		public boolean onPreferenceClick(Preference preference) {
+            			//Intent myIntent1 = new Intent(ManageActivity.this, DownloadActivity.class);
+            			//ManageActivity.this.startActivity(myIntent1);
+            			Toast.makeText(ManageActivity.this, "This is under construction",Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+                });
+				
+                
+                ;	
+          
+                /*Cache Enable */
+                Preference CachePref = (Preference) findPreference("CachePref");
+                CachePref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            		public boolean onPreferenceClick(Preference preference) {
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+                        boolean CachePreference = prefs.getBoolean("CachePref", AppPreference.isCacheEnabled());            
+                        AppPreference.setCacheEnabled(CachePreference);  
+        	            Log.i("CachePref",CachePreference+"");
+            			return true;   
+                    }
+                });
+                
+                
+                /*SVN*/
+                Preference SVNPref = (Preference) findPreference("SVNPref");
+                SVNPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            		public boolean onPreferenceClick(Preference preference) {
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+                        String editTextPreference = prefs.getString("SVNPref",AppPreference.getSVN());            
+                        AppPreference.setSVN(editTextPreference);  
+        	            Log.i("SVNPref",editTextPreference +"");
+            			return true;   
+                    }
+                });
+                
+                
+                /*Widget */
+                Preference WidgetPref = (Preference) findPreference("WidgetPref");
+                WidgetPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            		public boolean onPreferenceClick(Preference preference) {
+            			Intent myIntent1 = new Intent(ManageActivity.this, WidgetConfigActivity.class);
+            			ManageActivity.this.startActivity(myIntent1);
+                        return true;
+                    }
+                });
+        }
+        
+        @Override
+        protected void onStart(){
+        	super.onStart();
+        	getPrefs();        	
+        }
+        
+        private void getPrefs() {
+            // Get the xml/preferences.xml preferences
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+            boolean CachePreference = prefs.getBoolean("CachePref", AppPreference.isCacheEnabled());            
+            AppPreference.setCacheEnabled(CachePreference);     
+            Log.i("getPrefs",CachePreference+"");
+        }
 }

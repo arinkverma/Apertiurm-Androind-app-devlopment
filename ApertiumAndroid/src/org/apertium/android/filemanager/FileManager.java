@@ -6,12 +6,14 @@
 package org.apertium.android.filemanager;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -26,6 +28,21 @@ public class FileManager {
 	      out.write(buffer, 0, read);
 	    }
 	}
+	
+	
+	public static void downloadFile(String source, String target) throws IOException {
+		BufferedInputStream in = new BufferedInputStream(new URL(source).openStream());
+		java.io.FileOutputStream fos = new java.io.FileOutputStream(target);
+		java.io.BufferedOutputStream bout = new BufferedOutputStream(fos,1024);
+		byte data[] = new byte[1024];
+		while(in.read(data,0,1024)>=0)
+		{
+			bout.write(data);
+		}
+		bout.close();
+		in.close();
+	}
+	
 	
 	public static void setDIR(){
 	    File baseDir = new File(AppPreference.BASE_DIR());

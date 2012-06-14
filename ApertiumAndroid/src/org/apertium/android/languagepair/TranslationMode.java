@@ -1,7 +1,5 @@
 package org.apertium.android.languagepair;
 
-
-
 public class TranslationMode {
     //private variables
     private String _id;
@@ -14,28 +12,20 @@ public class TranslationMode {
     	this._package = null;
     }
     
-    public void setID(String i){
-    	this._id = i;
+    public String getID(){
+    	return this._id;
     }
     
-    public void setTitle(String i){
-    	this._title = i;
+    public String getTitle(){
+    	return this._title;
     }
     
     public void setPackage(String i){
     	this._package = i;
     }
     
-    public String getID(){
-    	return this._id;
-    }
-    
     public String getPackage(){
     	return this._package;
-    }
-    
-    public String getTitle(){
-    	return this._title;
     }
 
 }

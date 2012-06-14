@@ -4,15 +4,11 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/hello" />
-
     <EditText
         android:id="@+id/inputtext"
         android:layout_width="fill_parent"
         android:layout_height="120dp"
+        android:layout_weight="0.5"
         android:inputType="text|textMultiLine"
         android:text="@string/inputtext" />
 
@@ -21,33 +17,24 @@
         android:layout_height="wrap_content" >
 
         <Button
-            android:id="@+id/submit"
+            android:id="@+id/translateButton"
             android:layout_width="192dp"
             android:layout_height="wrap_content"
-            android:text="@string/submit" />
+            android:text="@string/translateButton" />
 
-            <Button
-                android:id="@+id/button1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/language" />
-
+        <Button
+            android:id="@+id/modeButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/language" />
     </LinearLayout>
 
     <EditText
         android:id="@+id/outputtext"
         android:layout_width="fill_parent"
         android:layout_height="120dp"
-      	android:inputType="text|textMultiLine"
+        android:layout_weight="0.5"
+        android:inputType="text|textMultiLine"
         android:text="" />
 
-  
-        <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-
-    </LinearLayout>
-
-
-    
 </LinearLayout>

@@ -11,8 +11,8 @@ import java.util.List;
 import org.apertium.Translator;
 import org.apertium.android.DB.DatabaseHandler;
 import org.apertium.android.helper.AppPreference;
+import org.apertium.android.helper.RulesHandler;
 import org.apertium.android.languagepair.TranslationMode;
-import org.apertium.android.languagepair.TranslationRules;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -36,6 +36,8 @@ import android.widget.Toast;
 
 
 public class ApertiumActivity extends Activity implements OnClickListener{
+	
+	private final String TAG = "ApertiumActiviy";
 
 	private static String MODE = "??-??";
 	private String outputText = null;
@@ -50,22 +52,52 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	private DatabaseHandler DB;
 	
 	//Rules Manager
-	private TranslationRules translationRules;
+	private RulesHandler rulesHandler;
 	
+
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		DB = new DatabaseHandler(this.getBaseContext());
+		rulesHandler = new RulesHandler(this.getBaseContext());
+		
+		Intent intent = getIntent();
+		Bundle extras = intent.getExtras();
+		
+		if (extras != null) {
+			MODE = extras.getString("Mode");
+			Log.i(TAG,"MODE set from other activity"+MODE);
+			if(MODE!=null){
+				rulesHandler.setCurrentMode(MODE);
+			}
+		}
+		
+    	
+		MODE = rulesHandler.getCurrentMode();
+
 		initView();
+	    UpdateMode();
+		
+		Log.i(TAG,"Created with Mode"+MODE);
 	}
 	
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
-		MODE = AppPreference.CurrentMode(this);
+		Intent intent = getIntent();
+		Bundle extras = intent.getExtras();
+		if (extras != null) {
+			MODE = extras.getString("Mode");
+			if(MODE!=null){
+				rulesHandler.setCurrentMode(MODE);
+			}
+		}
+		
+		MODE = rulesHandler.getCurrentMode();
 		_modeButton.setText(MODE);
+		Log.e(TAG,"onResume mode=" + rulesHandler.getCurrentMode());
 	}
 	  
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -84,8 +116,7 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 				share_text();
 				return true;
 			case R.id.about:
-				Toast.makeText(this, "This is under construction",Toast.LENGTH_SHORT).show();	
-				return true;
+				Toast.makeText(this, "This is under construction",Toast.LENGTH_SHORT).show();
 			default:
 				return super.onOptionsItemSelected(item);
 		}
@@ -95,21 +126,17 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	/* Init View, 
 	 * Initialing view */
 	private void initView() {
-		Log.i("ApertiumActivity.InitView","Started");
+		Log.i(TAG,"ApertiumActivity.InitView Started");
 		setContentView(R.layout.main);
 		_inputText 		= (EditText) findViewById(R.id.inputtext);
-		_submitButton 	= (Button) findViewById(R.id.submit);
+		_submitButton 	= (Button) findViewById(R.id.translateButton);
 		_outputText 	= (TextView) findViewById(R.id.outputtext);
-		_modeButton 	= (Button) findViewById(R.id.button1);
+		_modeButton 	= (Button) findViewById(R.id.modeButton);
 		
 		_submitButton.setOnClickListener(this);
-		_modeButton.setOnClickListener(this);
-		
-
-	     MODE = AppPreference.CurrentMode(this);
-	     _modeButton.setText(MODE);
-	     
- 	 	translationRules = new TranslationRules(this);
+		_modeButton.setOnClickListener(this);		
+		_modeButton.setText(MODE);    
+ 	 	
 	}
 	
 
@@ -125,13 +152,11 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 					 	outputText = "";  
 					
 				     try {				  
-				    	translationRules.setMode(MODE);				    	
-				    	Translator.setBase(translationRules.getClassLoader());
-						Translator.setMode(MODE);
+				    	Log.i(TAG,"Translator Run Cache ="+AppPreference.isCacheEnabled()+", MODE = "+MODE);
 						outputText  = Translator.translate(_inputText.getText().toString());
 						
 				     	} catch (Exception e) {
-							 Log.e("ApertiumActivity.TranslationRun",e.getMessage()+"MODE ="+MODE+";InputText = "+_inputText.getText());
+							 Log.e(TAG,"ApertiumActivity.TranslationRun MODE ="+MODE+";InputText = "+_inputText.getText());
 				        }		
 				}
 	            Message msg = Message.obtain();
@@ -141,6 +166,10 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	    };
 	    t.start();
 	}
+	
+	
+	
+
 
 	/* Waiting for Acknowledgement from threads running */
 	private Handler handler = new Handler(){
@@ -158,11 +187,9 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	@Override
 	public void onClick(View v) {
 		if (v.equals(_submitButton)){	
-			Log.i("ApertiumActivity.onclick","SubmitButton");
-			progressDialog = ProgressDialog.show(this, "", "Translating..",  true,false);
-			TranslationRun();
+					progressDialog = ProgressDialog.show(this, "", "Translating..",  true,false);
+					TranslationRun();
 		}else if(v.equals(_modeButton) && !MODE.equals("??-??")){
-			Log.i("ApertiumActivity.onclick","ModeButton");
 			TranslationMode M = DB.getMode(MODE);
 			List<TranslationMode> ModeList = DB.getModes(M.getPackage());
 			final String[] ModeTitle = new String[ModeList.size()];
@@ -177,24 +204,23 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 			builder.setTitle("Select mode");
 			builder.setItems(ModeTitle, new DialogInterface.OnClickListener() {
 			    public void onClick(DialogInterface dialog, int position) {
-			    	AppPreference.setCurrentMode(getApplicationContext(),ModeId[position]);
+			    	rulesHandler.setCurrentMode(ModeId[position]);
 				    Toast.makeText(getApplicationContext(), ModeTitle[position],   Toast.LENGTH_SHORT).show();
 				    MODE = ModeId[position];
-					_modeButton.setText(MODE);
+				    UpdateMode();				
 			    }
 			});
 			AlertDialog alert = builder.create();
 			alert.show();		
 		}
-		
-		  
+				  
 	}
 	
 	
 	/* Share text 
 	 * Intent to share translated text over other installed application services */
 	private void share_text() {
-		Log.i("ApertiumActivity.share_text","Started");
+		Log.i(TAG,"ApertiumActivity.share_text Started");
 		Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
 		sharingIntent.setType("text/plain");
 		sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Apertium Translate");
@@ -202,5 +228,18 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 		startActivity(Intent.createChooser(sharingIntent, "Share via"));
 	}
 	
+	private void UpdateMode(){			    	
+    	try {
+    		rulesHandler.setCurrentMode(MODE);	
+			Translator.setBase(rulesHandler.getClassLoader());
+			Translator.setCacheEnabled(AppPreference.isCacheEnabled());
+			Translator.setMode(MODE);
+			_modeButton.setText(MODE);
+			Log.i(TAG,"UpdateMode ="+MODE+", cache= "+AppPreference.isCacheEnabled());
+		} catch (Exception e) {
+			Log.e(TAG,"UpdateMode "+e);
+		}
+
+	}	
 	
 }
