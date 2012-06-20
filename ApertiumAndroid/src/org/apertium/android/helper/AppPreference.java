@@ -15,7 +15,8 @@ public class AppPreference   {
 	private static final String version = "2.0.1";
 	private static final String _RulePackage = "org.apertium.android.rule";
 	private static boolean _isCacheEnabled = false;
-	private static String _SVNaddress = "Nothing has been entered";
+	private static boolean _isMarkEnabled = false;
+	private static String _SVNaddress = "https://apertium.svn.sourceforge.net/svnroot/apertium/branches/gsoc2012/arink/packages/";
 	
 	
 //Package file name = <Base_Dir><Package Name><PackageExtention>
@@ -56,8 +57,12 @@ public class AppPreference   {
 		return _isCacheEnabled;
 	}
 	
-	public static void setSVN(String y){
-		_SVNaddress = y;
+	public static void setDisplayMark(boolean y){
+		_isMarkEnabled = y;
+	}
+	
+	public static boolean isDisplayMarkEnabled(){
+		return _isMarkEnabled;
 	}
 	
 	public static String getSVN(){

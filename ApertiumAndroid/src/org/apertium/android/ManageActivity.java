@@ -16,7 +16,6 @@ import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.widget.Toast;
  
 public class ManageActivity extends PreferenceActivity {
         @Override
@@ -48,9 +47,9 @@ public class ManageActivity extends PreferenceActivity {
                 Preference installSVNPref = (Preference) findPreference("installSVNPref");
                 installSVNPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             		public boolean onPreferenceClick(Preference preference) {
-            			//Intent myIntent1 = new Intent(ManageActivity.this, DownloadActivity.class);
-            			//ManageActivity.this.startActivity(myIntent1);
-            			Toast.makeText(ManageActivity.this, "This is under construction",Toast.LENGTH_SHORT).show();
+            			Intent myIntent1 = new Intent(ManageActivity.this, DownloadActivity.class);
+            			ManageActivity.this.startActivity(myIntent1);
+            			//Toast.makeText(ManageActivity.this, "This is under construction",Toast.LENGTH_SHORT).show();
                         return true;
                     }
                 });
@@ -71,19 +70,20 @@ public class ManageActivity extends PreferenceActivity {
                 });
                 
                 
-                /*SVN*/
-                Preference SVNPref = (Preference) findPreference("SVNPref");
-                SVNPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+                /*DisplayMark Enable */
+                Preference MarkPref = (Preference) findPreference("MarkPref");
+                MarkPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             		public boolean onPreferenceClick(Preference preference) {
                         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-                        String editTextPreference = prefs.getString("SVNPref",AppPreference.getSVN());            
-                        AppPreference.setSVN(editTextPreference);  
-        	            Log.i("SVNPref",editTextPreference +"");
+                        boolean MarkPreference = prefs.getBoolean("MarkPref", AppPreference.isDisplayMarkEnabled());            
+                        AppPreference.setDisplayMark(MarkPreference);  
+        	            Log.i("MarkPref",MarkPreference+"");
             			return true;   
                     }
                 });
                 
                 
+      
                 /*Widget */
                 Preference WidgetPref = (Preference) findPreference("WidgetPref");
                 WidgetPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
@@ -106,6 +106,9 @@ public class ManageActivity extends PreferenceActivity {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
             boolean CachePreference = prefs.getBoolean("CachePref", AppPreference.isCacheEnabled());            
             AppPreference.setCacheEnabled(CachePreference);     
-            Log.i("getPrefs",CachePreference+"");
+            
+            boolean MarkPreference = prefs.getBoolean("MarkPref", AppPreference.isDisplayMarkEnabled());            
+            AppPreference.setDisplayMark(MarkPreference);    
+           
         }
 }

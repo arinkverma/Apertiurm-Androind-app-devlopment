@@ -75,7 +75,7 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 		
     	
 		MODE = rulesHandler.getCurrentMode();
-
+		
 		initView();
 	    UpdateMode();
 		
@@ -86,6 +86,7 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	@Override
 	protected void onResume() {
 		super.onResume();
+		rulesHandler = new RulesHandler(this);
 		Intent intent = getIntent();
 		Bundle extras = intent.getExtras();
 		if (extras != null) {
@@ -152,7 +153,8 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 					 	outputText = "";  
 					
 				     try {				  
-				    	Log.i(TAG,"Translator Run Cache ="+AppPreference.isCacheEnabled()+", MODE = "+MODE);
+				    	Log.i(TAG,"Translator Run Cache ="+AppPreference.isCacheEnabled()+", Mark ="+AppPreference.isDisplayMarkEnabled()+ ", MODE = "+MODE);
+				    	Translator.setDisplayMarks(AppPreference.isDisplayMarkEnabled());
 						outputText  = Translator.translate(_inputText.getText().toString());
 						
 				     	} catch (Exception e) {

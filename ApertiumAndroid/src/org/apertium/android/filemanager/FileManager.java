@@ -14,10 +14,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.apertium.android.helper.AppPreference;
+
+import android.os.Handler;
+import android.os.Message;
 
 public class FileManager {
 	
@@ -111,5 +115,96 @@ public class FileManager {
 	    dir.delete();
 	}
 	
+	
+	
+	/* Download fucntion with handle communication */
+	
+    // Used to communicate state changes in the DownloaderThread
+    public static final int MESSAGE_DOWNLOAD_STARTED 		= 1000;
+    public static final int MESSAGE_DOWNLOAD_COMPLETE 	= 1001;
+    public static final int MESSAGE_UPDATE_PROGRESS_BAR 	= 1002;
+    public static final int MESSAGE_DOWNLOAD_CANCELED 	= 1003;
+    public static final int MESSAGE_CONNECTING_STARTED 	= 1004;
+    public static final int MESSAGE_ENCOUNTERED_ERROR 	= 1005;
+    // constants
+    public static final int DOWNLOAD_BUFFER_SIZE = 4096;
+    
+	public static void DownloadRun(final String Source,final String Target,final Handler handler){
+	    Thread t = new Thread() {
+	        @Override
+	        public void run() {
+				URL url;
+				URLConnection conn;
+				int fileSize, lastSlash;
+				String fileName;
+				BufferedInputStream inStream;
+				BufferedOutputStream outStream;
+				File outFile;
+				FileOutputStream fileStream;
+				Message msg;
+	                
+            
+				msg = Message.obtain();
+				msg.what = MESSAGE_CONNECTING_STARTED;
+				handler.sendMessage(msg);
+	                try {
+	                        url = new URL(Source);
+	                        conn = url.openConnection();
+	                        conn.setUseCaches(false);
+	                        fileSize = conn.getContentLength();
+	                     	                        
+	                        // get the filename
+	                        lastSlash = url.toString().lastIndexOf('/');
+	                        fileName = "file.txt";
+	                        if(lastSlash >=0) {
+	                                fileName = url.toString().substring(lastSlash + 1);
+	                        }
+	                        if(fileName.equals("")) {
+	                                fileName = "file.txt";
+	                        }
+	                        
+	                        // notify download start
+	                        int fileSizeInKB = fileSize / 1024;
+	                        msg = Message.obtain(handler, MESSAGE_DOWNLOAD_STARTED, fileSizeInKB , 0);
+	        	            handler.sendMessage(msg);
+	                        
+	                        // start download
+	                        inStream = new BufferedInputStream(conn.getInputStream());
+	                        outFile = new File(Target + "/" + fileName);
+	                        fileStream = new FileOutputStream(outFile);
+	                        outStream = new BufferedOutputStream(fileStream, DOWNLOAD_BUFFER_SIZE);
+	                        byte[] data = new byte[DOWNLOAD_BUFFER_SIZE];
+	                        int bytesRead = 0, totalRead = 0;
+	                        while(!isInterrupted() && (bytesRead = inStream.read(data, 0, data.length)) >= 0) {
+	                                outStream.write(data, 0, bytesRead);	                                
+	                                // update progress bar
+	                                totalRead += bytesRead;
+	                                int totalReadInKB = totalRead / 1024;
+	                                msg = Message.obtain(handler,MESSAGE_UPDATE_PROGRESS_BAR,totalReadInKB,0);
+	    	        	            handler.sendMessage(msg);
+	                        }
+	                        
+	                        outStream.close();
+	                        fileStream.close();
+	                        inStream.close();
+	                        
+	                        if(isInterrupted()) {
+	                                // the download was canceled, so let's delete the partially downloaded file
+	                                outFile.delete();
+	                        }
+	                        else {
+	                                // notify completion
+	                               	msg = Message.obtain();
+	                               	msg.what = MESSAGE_DOWNLOAD_COMPLETE;	                               
+	    	        	            handler.sendMessage(msg);
+	                        }
+	                } catch(Exception e) {
+	                	msg = Message.obtain(handler,MESSAGE_ENCOUNTERED_ERROR,e.toString());
+	        	        handler.sendMessage(msg);
+	                }
+	        }
+	    };
+	    t.start();
+	}
 	
 }

@@ -37,13 +37,12 @@
 		        android:defaultValue="false"
 		        android:summary="For quick translation enable"
 		        android:key="CachePref" />
-        <EditTextPreference
-                android:name="SVN address"
-                android:summary="Enter the address of language list on SVN"
-                android:defaultValue="Nothing"
-                android:title="SVN address"
-                android:key="SVNPref" />
-
+		
+		<CheckBoxPreference
+		        android:title="Mark Enable"
+		        android:defaultValue="false"
+		        android:summary="Mark the unknown words"
+		        android:key="MarkPref" />
         
         <Preference
                 android:title="Widget Settings"

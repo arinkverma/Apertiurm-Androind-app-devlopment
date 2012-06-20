@@ -3,8 +3,17 @@ Apertium on your mobile
 Port Apertium to Android and possibly iPhone. Apertium has a Java port which doesn't currently work on mobile telephones. Lots of people have mobile telephones, and some of them would like to have a translator there.
 
 
-Features [version 2.3]
+Features [version 2.3.5]
 =========
+<b>Download Activity</b>
+<br/>
+![Alt download](http://1.bp.blogspot.com/-w-rQ9v5mQfo/T-JBRusABDI/AAAAAAAAAug/QPbf9qApmh0/s1600/device-2012-06-21-023024.png "Download Activity")
+<ul>
+<li>User can download language pair from SVN over internet.</li>
+<li>Progress bar showing status of package being downloaded.</li>
+<li>At present only shipped with temp SVN</li>
+</ul>
+
 <b>Desktop Widget</b>
 <br/>
 ![Alt widget](http://1.bp.blogspot.com/-4fbKyCbz0j8/T9PI4Dzta4I/AAAAAAAAAtc/RPZEOZYm_LA/s1600/device-2012-06-10-031043.png "Desktop Widget")
@@ -18,7 +27,7 @@ Features [version 2.3]
 
 <b>Caching support</b>
 <br/>
-![Alt cache](http://3.bp.blogspot.com/-TQSJ5wlu5Xg/T9POYjybQEI/AAAAAAAAAtw/dDTTj9jlMtY/s1600/device-2012-06-10-030505.png "Cache in setting")
+![Alt cache](http://4.bp.blogspot.com/-lAzs4khWnq4/T-JTtoOFUiI/AAAAAAAAAu4/zHPi6oJzmMY/s1600/device-2012-06-21-024705.png "Cache in setting")
 	<ul>
 <li>The cache feature developed by <a href="http://wiki.apertium.org/wiki/User:Mikel/GSoC_2012_Application">Mikel</a> on lttoolbox, has been added to application</li>
 <li>This make subsequent translation instantaneously</li>
