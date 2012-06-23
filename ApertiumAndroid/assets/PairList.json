@@ -1,0 +1,10 @@
+{
+	"modeitem" : [
+		{"id" : "eo-en", "title" : "Esperanto-English", package : "eo-en"},
+		{"id" : "en-eo", "title" : "English-Esperanto", package : "eo-en"},
+		{"id" : "eo-en", "title" : "Esperanto-English", package : "eo-en"},
+		{"id" : "eo-en", "title" : "Esperanto-English", package : "eo-en"},
+		{"id" : "eo-en", "title" : "Esperanto-English", package : "eo-en"},
+		{"id" : "eo-en", "title" : "Esperanto-English", package : "eo-en"}
+ 	]
+ }

@@ -3,8 +3,12 @@ Apertium on your mobile
 Port Apertium to Android and possibly iPhone. Apertium has a Java port which doesn't currently work on mobile telephones. Lots of people have mobile telephones, and some of them would like to have a translator there.
 
 
-Features [version 2.3.5]
+Features [version 2.3.6]
 =========
+<b>ClipBoard Handling</b>
+<br/>
+Although the translated text is rendered on android.widget.EditText from which user can select and copy. But having a feature to automatic copying of text to clipboard helps more. Also, there is a option to fill input text field from text on clipboard.
+
 <b>Download Activity</b>
 <br/>
 ![Alt download](http://1.bp.blogspot.com/-w-rQ9v5mQfo/T-JBRusABDI/AAAAAAAAAug/QPbf9qApmh0/s1600/device-2012-06-21-023024.png "Download Activity")
