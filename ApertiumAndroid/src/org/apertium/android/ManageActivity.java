@@ -18,7 +18,8 @@ import android.preference.PreferenceManager;
 import android.util.Log;
  
 public class ManageActivity extends PreferenceActivity {
-        @Override
+        @SuppressWarnings("deprecation")
+		@Override
         protected void onCreate(Bundle savedInstanceState) {
                 super.onCreate(savedInstanceState);
                 addPreferencesFromResource(R.xml.setting);
@@ -70,6 +71,30 @@ public class ManageActivity extends PreferenceActivity {
                 });
                 
                 
+                /*Push Clip Enable */
+                Preference ClipPushPref = (Preference) findPreference("ClipPushPref");
+                ClipPushPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            		public boolean onPreferenceClick(Preference preference) {
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+                        boolean ClipPushPreference = prefs.getBoolean("ClipPushPref", AppPreference.isClipBoardPushEnabled());            
+                        AppPreference.setClipBoardPush(ClipPushPreference);  
+        	            Log.i("CachePushPref",ClipPushPreference+"");
+            			return true;   
+                    }
+                });
+                
+                /*Get Clip Enable */
+                Preference ClipGetPref = (Preference) findPreference("ClipGetPref");
+                ClipGetPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+            		public boolean onPreferenceClick(Preference preference) {
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+                        boolean ClipGetPreference = prefs.getBoolean("ClipGetPref", AppPreference.isClipBoardGetEnabled());            
+                        AppPreference.setClipBoardGet(ClipGetPreference);  
+        	            Log.i("CacheGetPref",ClipGetPreference+"");
+            			return true;   
+                    }
+                });
+                
                 /*DisplayMark Enable */
                 Preference MarkPref = (Preference) findPreference("MarkPref");
                 MarkPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
@@ -109,6 +134,12 @@ public class ManageActivity extends PreferenceActivity {
             
             boolean MarkPreference = prefs.getBoolean("MarkPref", AppPreference.isDisplayMarkEnabled());            
             AppPreference.setDisplayMark(MarkPreference);    
+            
+            boolean ClipPushPreference = prefs.getBoolean("ClipPushPref", AppPreference.isClipBoardPushEnabled());            
+            AppPreference.setClipBoardPush(ClipPushPreference);    
+            
+            boolean ClipGetPreference = prefs.getBoolean("ClipGetPref", AppPreference.isClipBoardGetEnabled());            
+            AppPreference.setClipBoardGet(ClipGetPreference);  
            
         }
 }

@@ -43,6 +43,18 @@
 		        android:defaultValue="false"
 		        android:summary="Mark the unknown words"
 		        android:key="MarkPref" />
+		
+		<CheckBoxPreference
+		        android:title="ClipBoard get Enable"
+		        android:defaultValue="false"
+		        android:summary="Fill input from clipboard"
+		        android:key="ClipGetPref" />
+		
+		<CheckBoxPreference
+		        android:title="ClipBoard push Enable"
+		        android:defaultValue="false"
+		        android:summary="Copy output to clipboard"
+		        android:key="ClipPushPref" />
         
         <Preference
                 android:title="Widget Settings"

@@ -11,6 +11,7 @@ import java.util.List;
 import org.apertium.Translator;
 import org.apertium.android.DB.DatabaseHandler;
 import org.apertium.android.helper.AppPreference;
+import org.apertium.android.helper.ClipboardHandler;
 import org.apertium.android.helper.RulesHandler;
 import org.apertium.android.languagepair.TranslationMode;
 
@@ -54,6 +55,9 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	//Rules Manager
 	private RulesHandler rulesHandler;
 	
+	
+	//Clipboard
+	ClipboardHandler clipboardHandler = null;
 
 
 	@Override
@@ -61,6 +65,8 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 		super.onCreate(savedInstanceState);
 		DB = new DatabaseHandler(this.getBaseContext());
 		rulesHandler = new RulesHandler(this.getBaseContext());
+		
+		clipboardHandler = new ClipboardHandler(this);
 		
 		Intent intent = getIntent();
 		Bundle extras = intent.getExtras();
@@ -130,14 +136,18 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 		Log.i(TAG,"ApertiumActivity.InitView Started");
 		setContentView(R.layout.main);
 		_inputText 		= (EditText) findViewById(R.id.inputtext);
+		if(AppPreference.isClipBoardGetEnabled()){
+			_inputText.setText(clipboardHandler.getText());
+		}
+		
 		_submitButton 	= (Button) findViewById(R.id.translateButton);
 		_outputText 	= (TextView) findViewById(R.id.outputtext);
 		_modeButton 	= (Button) findViewById(R.id.modeButton);
 		
 		_submitButton.setOnClickListener(this);
 		_modeButton.setOnClickListener(this);		
-		_modeButton.setText(MODE);    
- 	 	
+		_modeButton.setText(MODE);   
+		 	 	
 	}
 	
 
@@ -156,6 +166,11 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 				    	Log.i(TAG,"Translator Run Cache ="+AppPreference.isCacheEnabled()+", Mark ="+AppPreference.isDisplayMarkEnabled()+ ", MODE = "+MODE);
 				    	Translator.setDisplayMarks(AppPreference.isDisplayMarkEnabled());
 						outputText  = Translator.translate(_inputText.getText().toString());
+						
+						if(AppPreference.isClipBoardPushEnabled()){
+							clipboardHandler.putText(outputText);
+						}
+						
 						
 				     	} catch (Exception e) {
 							 Log.e(TAG,"ApertiumActivity.TranslationRun MODE ="+MODE+";InputText = "+_inputText.getText());

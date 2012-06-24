@@ -16,6 +16,9 @@ public class AppPreference   {
 	private static final String _RulePackage = "org.apertium.android.rule";
 	private static boolean _isCacheEnabled = false;
 	private static boolean _isMarkEnabled = false;
+	private static boolean _isClipBoardGetEnabled = false;
+	private static boolean _isClipBoardPushEnabled = false;
+	
 	private static String _SVNaddress = "https://apertium.svn.sourceforge.net/svnroot/apertium/branches/gsoc2012/arink/packages/";
 	
 	
@@ -64,6 +67,23 @@ public class AppPreference   {
 	public static boolean isDisplayMarkEnabled(){
 		return _isMarkEnabled;
 	}
+	
+	public static void setClipBoardPush(boolean y){
+		_isClipBoardPushEnabled = y;
+	}
+	
+	public static boolean isClipBoardPushEnabled(){
+		return _isClipBoardPushEnabled;
+	}
+	
+	public static void setClipBoardGet(boolean y){
+		_isClipBoardGetEnabled = y;
+	}
+	
+	public static boolean isClipBoardGetEnabled(){
+		return _isClipBoardGetEnabled;
+	}
+	
 	
 	public static String getSVN(){
 		return _SVNaddress;
