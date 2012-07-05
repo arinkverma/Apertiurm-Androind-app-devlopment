@@ -14,6 +14,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apertium.Translator;
+import org.apertium.android.DB.DatabaseHandler;
 import org.apertium.android.filemanager.FileManager;
 import org.apertium.android.helper.AppPreference;
 
@@ -54,6 +56,8 @@ public class DownloadActivity extends Activity implements OnClickListener{
     private String []Address = null;
     private String toDownload = null;
     private int FILE_SIZE = 0;
+    private String ModifiedSince = null;
+    private DatabaseHandler DB = null;
     
 	
 	/** Called when the activity is first created. */
@@ -66,6 +70,7 @@ public class DownloadActivity extends Activity implements OnClickListener{
 	    _submitButton.setOnClickListener(this);
 	    thisActivity = this;
 	  
+	    DB = new DatabaseHandler(this);
 	    progressDialog = new ProgressDialog(thisActivity);
 	    progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 	    progressDialog.setTitle("Downloading\nSVN List");
@@ -96,15 +101,20 @@ public class DownloadActivity extends Activity implements OnClickListener{
 		        				Log.e(updated[1],updated[2] + "\n" );
 		        				Content.add(updated[2]);
 		        				ContentAddress.add(updated[1]); 		        				
-		        			}
-		        			
+		        			}		        			
 		        		}				
 		        	}	
 		        	
 		           	LIST = new String[Content.size()-1];
 		        	Address = new String[Content.size()-1];
 		        	for(int i=0;i<Content.size()-1;i++){
-		        		LIST[i] = Content.get(i+1);
+		        		String LastDate = DB.getLastModifiedDate(Content.get(i+1));
+		        		Log.e("arink"," "+LastDate+"|"+ModifiedSince);
+		        		if(LastDate != null && LastDate.equals(ModifiedSince)){
+		        			LIST[i] = Translator.getTitle(AppPreference.getSVN()+"/"+Content.get(i+1))+" (updated)";
+		        		}else{
+		        			LIST[i] = Translator.getTitle(AppPreference.getSVN()+"/"+Content.get(i+1));	        			
+		        		}
 		        		Address[i] = ContentAddress.get(i+1);
 		        	}
 		        	
@@ -138,7 +148,8 @@ public class DownloadActivity extends Activity implements OnClickListener{
 		    //Download started    	
 		        case   FileManager.MESSAGE_DOWNLOAD_STARTED : 
 		        	FILE_SIZE = (int)msg.arg1;	        	
-	
+		        	ModifiedSince = (String) msg.obj;
+		        	Log.d("Download","Lastmodified ="+ModifiedSince);
 		        	if(isListLoaded == false){
 		        		progressDialog.setTitle("Fetching List"+"["+FILE_SIZE+"kb]");
 		        		progressDialog.setMessage("Downloading ["+ FILE_SIZE+"kb]");
@@ -201,6 +212,7 @@ public class DownloadActivity extends Activity implements OnClickListener{
 		        	Intent myIntent = new Intent(thisActivity, InstallActivity.class);	
 			    	myIntent.putExtra("filepath", AppPreference.TEMP_DIR()+"/"+toDownload);
 			    	myIntent.putExtra("filename", toDownload);
+			    	myIntent.putExtra("filedate",ModifiedSince);
 			    	startActivity(myIntent);
 	        	}
 	        	break;

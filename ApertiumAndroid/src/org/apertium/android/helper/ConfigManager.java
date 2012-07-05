@@ -5,74 +5,52 @@
 
 package org.apertium.android.helper;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.apertium.Translator;
+import org.apertium.android.languagepair.TranslationMode;
+
 
 public class ConfigManager {
 	
-	private JSONObject jObject;
-	private JSONObject pairObject;
-	private JSONObject modesObject;
-	private JSONArray modeitemArray;
-	private Map<String,String> modeMap;
-	
-	private String version;
+	private String modifiedDate;
 	private String package_id;
+	private String package_Title;
+	private String []modesID;
+	private List<TranslationMode> modes;
 	
-	public ConfigManager(String path) throws IOException, JSONException  {
-		ZipFile zipFile;
-		String strUnzipped = ""; 		
-
-
-			zipFile = new ZipFile(path);
-			
-			ZipEntry entry1 = zipFile.getEntry("config.json");
-			InputStream stream1;
-			stream1 = zipFile.getInputStream(entry1);
-			for (int c = stream1.read(); (int)c != -1; c = stream1.read()) {
-			      strUnzipped += (char) c;
+	public ConfigManager(String path,String packID) throws Exception {
+			this.package_Title = Translator.getTitle(path);
+			Translator.setBase(path);
+			this.modesID = Translator.getAvailableModes();
+			modes = new ArrayList<TranslationMode>();
+			for(int i=0;i<this.modesID.length;i++){
+				TranslationMode M = new TranslationMode(this.modesID[i], this.modesID[i]);
+				modes.add(M);
 			}
 			
-			jObject = new JSONObject(strUnzipped);	
-			pairObject = jObject.getJSONObject("pair");
-			modesObject = pairObject.getJSONObject("modes");
-			version	= pairObject.getString("version");
-			package_id	= pairObject.getString("id");
-			modeitemArray = modesObject.getJSONArray("modeitem");
+			this.package_id =  packID;
 	}
 	
-	
-	public JSONArray getModeItems(){
-		return modeitemArray;
+	public List<TranslationMode> getAvailableModes(){
+		return this.modes;
 	}
 	
-	public Map<String, String> getModeMap(){
-		this.modeMap=new HashMap<String, String>();
-		
-		for (int i=0; i<modeitemArray.length(); i++) {
-			try {
-				modeMap.put(modeitemArray.getJSONObject(i).getString("id").toString(),modeitemArray.getJSONObject(i).getString("title").toString());
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}			
-		}
-		return modeMap;
-	}
-	
-	public String Version(){
-		return version;		
-	}
-	
-	public String Package(){
+	public String PackageID(){
 		return package_id;		
+	}
+	
+	public void setModifiedDate(String D){
+		this.modifiedDate = D;
+	}
+	
+	public String ModifiedDate(){
+		return this.modifiedDate;
+	}
+	
+	public String PackageTitle(){
+		return this.package_Title;
 	}
 	
 }

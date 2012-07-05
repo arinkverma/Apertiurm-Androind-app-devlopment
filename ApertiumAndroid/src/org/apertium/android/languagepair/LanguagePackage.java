@@ -2,19 +2,29 @@ package org.apertium.android.languagepair;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
+
+import org.apertium.android.helper.ConfigManager;
 
 public class LanguagePackage {		 
 	//private variables
 	private String _package_id;
+	private String _package_title;
 	private List<TranslationMode> _modes;
-	private String _version;
+	private String _lastDate;
 	
 	public LanguagePackage(String Packageid){
 		this._package_id = Packageid;
 		this._modes=new ArrayList<TranslationMode>();	    	
-	}	    
+	}	 
+	
+	public LanguagePackage(ConfigManager config){
+		this._lastDate = config.ModifiedDate();
+		this._modes = config.getAvailableModes();
+		this._package_id = config.PackageID();
+		this._package_title = config.PackageTitle();		
+	}
+	
+	
 	    
 /**ID*/
     public String getID(){
@@ -22,15 +32,15 @@ public class LanguagePackage {
     }
 	 
 /**Version*/
-    public String getVersion(){
-        return this._version;
+    public String getLastDate(){
+        return this._lastDate;
     }
  
-    public void setVersion(String V){
-        this._version = V;
+    public void setLastDate(String V){
+        this._lastDate = V;
     }
 	    
-/* Is package version is latest than argument version */
+/* Is package version is latest than argument version 
     public boolean isNewerthan(String Version){
     	if(this._version == null){
     		return false;
@@ -55,14 +65,12 @@ public class LanguagePackage {
     		}
     	}
         return true;
-    }
+    }*/
 	    
 /**Modes*/
-	    public void setModes(JSONArray modeitems) throws JSONException{	 
-	    	for (int i=0; i<modeitems.length(); i++) {
-				String id = modeitems.getJSONObject(i).getString("id").toString();
-				String title = modeitems.getJSONObject(i).getString("title").toString();
-				TranslationMode m = new TranslationMode(id,title);
+	    public void setModes(List<TranslationMode> modeitems){	 
+	    	for (int i=0; i<modeitems.size(); i++) {
+				TranslationMode m =  modeitems.get(i);
 				m.setPackage(this._package_id);
 				_modes.add(m);
 			}

@@ -36,8 +36,11 @@ public class DatabaseHandler {
     
     //Package Table
     private static final String TABLE_PACKAGE 		= "Package";
+//    private static final String KEY_PACKAGE_TITLE 	= "title";
     private static final String KEY_PACKAGE_ID 		= "id";
-    private static final String KEY_PACKAGE_VERSION 	= "version";
+//We dont support version at present
+//    private static final String KEY_PACKAGE_VERSION 	= "version";
+    private static final String KEY_PACKAGE_LASTMODIFIED = "LastDate";
     
     private Context context;
     
@@ -59,7 +62,7 @@ public class DatabaseHandler {
     	
     	//Inserting package details
     	values.put(KEY_PACKAGE_ID,L.getID()); 
-    	values.put(KEY_PACKAGE_VERSION,L.getVersion());     	
+    	values.put(KEY_PACKAGE_LASTMODIFIED,L.getLastDate());     	
     	db.insert(TABLE_PACKAGE, null, values);
     	values.clear();
     	
@@ -133,6 +136,21 @@ public class DatabaseHandler {
         return LangList;    	
     }
      
+    public String getLastModifiedDate(String Package_ID){
+    	OpenHelper openHelper = new OpenHelper(this.context);
+	    SQLiteDatabase db = openHelper.getReadableDatabase();
+    	        
+        // Select All Query
+        String selectQuery = "SELECT  "+KEY_PACKAGE_LASTMODIFIED+" FROM " + TABLE_PACKAGE + " WHERE "+KEY_PACKAGE_ID +" = '"+Package_ID+"'";
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        String M = null;
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+        		M 	= cursor.getString(0);	//date              
+        }
+        db.close();
+        return M;  
+    }
     
     //Get modes from Package
     public TranslationMode getMode(String Mode_ID) {
@@ -146,14 +164,11 @@ public class DatabaseHandler {
         TranslationMode M = null;
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
-            //do {
-                
-                String m 	= cursor.getString(0);	//Id
+        		String m 	= cursor.getString(0);	//Id
                 String t 	= cursor.getString(1);	//Title
                 String p 	= cursor.getString(2);	//Package_id
                 M = new TranslationMode(m,t);
                 M.setPackage(p);
-           // } while (cursor.moveToNext());
         }
         db.close();
         return M;    	
@@ -173,13 +188,12 @@ public class DatabaseHandler {
         LanguagePackage L = null;
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
-            //do {
-                
+           
                 String l 	= cursor.getString(0);	//Id
-                String v 	= cursor.getString(1);	//Version
+                String v 	= cursor.getString(1);	//Last modified date
                 L = new LanguagePackage(l);
-                L.setVersion(v);
-           // } while (cursor.moveToNext());
+                L.setLastDate(v);
+          
         }
         db.close();
         return L;    	
@@ -216,7 +230,7 @@ public class DatabaseHandler {
         @Override
         public void onCreate(SQLiteDatabase db) {	
             db.execSQL("CREATE TABLE " + TABLE_MODE + "("+KEY_MODE_ID+" TEXT PRIMARY KEY, "+KEY_MODE_TITLE+" TEXT,"+KEY_MODE_PACKAGE+" TEXT)");
-            db.execSQL("CREATE TABLE " + TABLE_PACKAGE + "("+KEY_PACKAGE_ID+" TEXT PRIMARY KEY, "+KEY_PACKAGE_VERSION+" TEXT)");
+            db.execSQL("CREATE TABLE " + TABLE_PACKAGE + "("+KEY_PACKAGE_ID+" TEXT PRIMARY KEY, "+KEY_PACKAGE_LASTMODIFIED+" TEXT)");
         }
      
         // Upgrading database

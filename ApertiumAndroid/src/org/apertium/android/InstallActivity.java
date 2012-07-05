@@ -19,8 +19,6 @@ import org.apertium.android.helper.AppPreference;
 import org.apertium.android.helper.ConfigManager;
 import org.apertium.android.languagepair.LanguagePackage;
 import org.apertium.android.languagepair.TranslationMode;
-import org.json.JSONArray;
-import org.json.JSONException;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -46,7 +44,9 @@ public class InstallActivity extends Activity implements OnClickListener {
 	private DatabaseHandler DB;	
 	private LanguagePackage pack;
 	private List<TranslationMode> translationModes;
-	private String path = "-1";
+	private String _path = "-1";
+	private String _packageID = "-1";
+	private String _lastModified ="-1";
 	
 	//Action to be perform
 	private enum Action  {install,update,discard};
@@ -56,7 +56,6 @@ public class InstallActivity extends Activity implements OnClickListener {
 	
 	//To pharse and manage Config.json
 	private ConfigManager config;
-	private JSONArray modeitems;
 	
 	
 	/** Called when the activity is first created. */
@@ -69,54 +68,42 @@ public class InstallActivity extends Activity implements OnClickListener {
 		todo = Action.install;
 		
 		try {
-			config = new ConfigManager(path);
-			Info1.append("\nName: "+config.Package()+"\n");
-			Info1.append("Ver: "+config.Version()+"\n");
-			
-		} catch (IOException e1) {
-			Log.e(TAG,e1.getMessage());
-		} catch (JSONException e1) {
-			Info1.append("Error in config file "+e1);
-			Log.e(TAG,"Error in config file "+e1.getMessage());
-		}catch (Exception e1) {
-			Info1.append("Error in config file "+e1);
-			Log.e(TAG,"Error in config file "+e1.getMessage());
+			config = new ConfigManager(this._path,this._packageID);
+			config.setModifiedDate(this._lastModified);
+			pack = new LanguagePackage(config);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-		
+		Info1.append("\nName: "+config.PackageTitle()+"\n");
+		//At present no version number is supported 
+		//Info1.append("Ver: "+config.Version()+"\n");
+	
 		
 		/* Checking the version of package, hence perform action accordingly */
-		LanguagePackage P = DB.getPackage(config.Package());
+		String LastDate = DB.getLastModifiedDate(config.PackageID());
 		
-		if(P!=null){
-			if(P.isNewerthan(config.Version())){	
+		if(LastDate!=null){
+			if(LastDate.equals(this._lastModified)){	
 				todo = Action.discard;
-				_submitButton.setText("This is old version");
+				_submitButton.setText("This version is already installed!");
 			}else{
 				todo = Action.update;				
 				_submitButton.setText("Update");
 			}
-			Info1.append("Ver installed: "+P.getVersion()+"\n");
 		}
 		
 		
 		/* Finding the mode present in the package */		
-		modeitems = config.getModeItems();	
+		this.translationModes = config.getAvailableModes();			
 		
-		try {
-			pack = new LanguagePackage(config.Package());
-			pack.setVersion(config.Version());
-			pack.setModes(modeitems);
-			translationModes = pack.getModes();
-			Heading2.setText("Modes found!");
-			Info2.setText("");
-			for (int i=0; i<translationModes.size(); i++) {
-				TranslationMode m = translationModes.get(i);
-				Info2.append((i+1)+". "+m.getTitle()+" ["+m.getID()+"]\n");						
-			}
-			
-		} catch (JSONException e) {
-			Info2.setText("Error in config file "+e);
-		}	
+		
+		Heading2.setText("Modes found!");
+		Info2.setText("");
+		for (int i=0; i<this.translationModes.size(); i++) {
+			TranslationMode M = this.translationModes.get(i);
+			Info2.append((i+1)+". "+M.getID()+"\n");						
+		}
+		
 	}
 	
 	
@@ -125,7 +112,10 @@ public class InstallActivity extends Activity implements OnClickListener {
 	private void initView() {
 		Log.i("InstallActivity.InitView","Started");
 	    Bundle extras = getIntent().getExtras();
-	    path = extras.getString("filepath");
+	    this._path = extras.getString("filepath");
+	    this._packageID = extras.getString("filename");
+	    this._lastModified = extras.getString("filedate");
+	    
 		DB = new DatabaseHandler(this.getBaseContext());
 	    setContentView(R.layout.install_package);
 		Heading1 = (TextView) findViewById(R.id.textView1);
@@ -136,7 +126,7 @@ public class InstallActivity extends Activity implements OnClickListener {
 		_cancelButton = (Button) findViewById(R.id.discardButton);
 
 		Heading1.setText("Package");
-		Info1.setText(path);
+		Info1.setText(this._path);
 		_submitButton.setText("Install");
 		
 		_submitButton.setOnClickListener(this);
@@ -150,6 +140,7 @@ public class InstallActivity extends Activity implements OnClickListener {
 		if (v.equals(_submitButton)){
 			if(todo == Action.install){
 				//First run to copy new package
+				Log.d("Todo","install");
 				run1();	
 			}else if(todo == Action.update){
 				//Zero run to remove previous package
@@ -173,7 +164,7 @@ public class InstallActivity extends Activity implements OnClickListener {
 		        @Override
 		        public void run() {
 		        	try {
-		        		File file = new File(AppPreference.BASE_DIR()+"/"+config.Package()+".zip");
+		        		File file = new File(AppPreference.BASE_DIR()+"/"+config.PackageID()+".jar");
 		        		FileManager.remove(file);
 		        		DB.deletePackage(pack.getID());
 		        	} catch (Exception e) {
@@ -205,8 +196,8 @@ public class InstallActivity extends Activity implements OnClickListener {
 				OutputStream out = null;
 	        	try {	        		
 	        		FileManager.setDIR();				    
-					in = new FileInputStream(path);
-					out = new FileOutputStream(AppPreference.BASE_DIR()+"/"+config.Package()+".zip");					
+					in = new FileInputStream(_path);
+					out = new FileOutputStream(AppPreference.BASE_DIR()+"/"+config.PackageID()+".jar");					
 	        		FileManager.copyFile(in,out);	        		
 	        		in.close();
 					out.flush();

@@ -136,6 +136,7 @@ public class FileManager {
 				URL url;
 				URLConnection conn;
 				int fileSize, lastSlash;
+				String ModifiedSince = null;
 				String fileName;
 				BufferedInputStream inStream;
 				BufferedOutputStream outStream;
@@ -152,7 +153,7 @@ public class FileManager {
 	                        conn = url.openConnection();
 	                        conn.setUseCaches(false);
 	                        fileSize = conn.getContentLength();
-	                     	                        
+	                        ModifiedSince = conn.getLastModified()+"";           
 	                        // get the filename
 	                        lastSlash = url.toString().lastIndexOf('/');
 	                        fileName = "file.txt";
@@ -165,7 +166,7 @@ public class FileManager {
 	                        
 	                        // notify download start
 	                        int fileSizeInKB = fileSize / 1024;
-	                        msg = Message.obtain(handler, MESSAGE_DOWNLOAD_STARTED, fileSizeInKB , 0);
+	                        msg = Message.obtain(handler, MESSAGE_DOWNLOAD_STARTED, fileSizeInKB , 0, ModifiedSince);
 	        	            handler.sendMessage(msg);
 	                        
 	                        // start download
