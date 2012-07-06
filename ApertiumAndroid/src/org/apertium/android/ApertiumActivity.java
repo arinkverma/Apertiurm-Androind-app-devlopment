@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.apertium.Translator;
 import org.apertium.android.DB.DatabaseHandler;
+import org.apertium.android.filemanager.FileManager;
 import org.apertium.android.helper.AppPreference;
 import org.apertium.android.helper.ClipboardHandler;
 import org.apertium.android.helper.RulesHandler;
@@ -63,6 +64,9 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		FileManager.setDIR();
+		
 		DB = new DatabaseHandler(this.getBaseContext());
 		rulesHandler = new RulesHandler(this.getBaseContext());
 		

@@ -14,9 +14,11 @@ import org.apertium.android.languagepair.TranslationMode;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 import dalvik.system.DexClassLoader;
 
-public class RulesHandler extends SecureClassLoader{
+public class RulesHandler {//extends SecureClassLoader{
+	String  TAG = "RulesHandler";
 	
 	private File _tmpDIR;
 	private Context CTX;
@@ -77,6 +79,7 @@ public class RulesHandler extends SecureClassLoader{
 	}
 	
 	public DexClassLoader getClassLoader(){
+		Log.d(TAG,"PathCurrentPackage ="+PathCurrentPackage()+", ODEX path="+this._tmpDIR.getAbsolutePath());
 		return new DexClassLoader(PathCurrentPackage(),this._tmpDIR.getAbsolutePath(), null, this.getClass().getClassLoader());
 	}
 	

@@ -164,7 +164,7 @@ public class InstallActivity extends Activity implements OnClickListener {
 		        @Override
 		        public void run() {
 		        	try {
-		        		File file = new File(AppPreference.BASE_DIR()+"/"+config.PackageID()+".jar");
+		        		File file = new File(AppPreference.BASE_DIR()+"/"+config.PackageID());
 		        		FileManager.remove(file);
 		        		DB.deletePackage(pack.getID());
 		        	} catch (Exception e) {
@@ -192,24 +192,9 @@ public class InstallActivity extends Activity implements OnClickListener {
 	    Thread t = new Thread() {
 	        @Override
 	        public void run() {
-	        	InputStream in = null;
-				OutputStream out = null;
-	        	try {	        		
-	        		FileManager.setDIR();				    
-					in = new FileInputStream(_path);
-					out = new FileOutputStream(AppPreference.BASE_DIR()+"/"+config.PackageID()+".jar");					
-	        		FileManager.copyFile(in,out);	        		
-	        		in.close();
-					out.flush();
-					out.close();
-	        	} catch (IOException e) {
-					e.printStackTrace();
-					Log.e("Install",e.getMessage());
-					Message msg = Message.obtain();
-		            msg.what = -1;
-		            handler.sendMessage(msg);
-		            return;
-				}
+	        	
+				FileManager.move(_path,AppPreference.BASE_DIR()+"/"+config.PackageID());
+				
 	            Message msg = Message.obtain();
 	            msg.what = 1;
 	            handler.sendMessage(msg);

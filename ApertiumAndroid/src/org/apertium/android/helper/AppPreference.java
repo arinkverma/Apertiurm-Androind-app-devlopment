@@ -23,7 +23,7 @@ public class AppPreference   {
 	
 	
 //Package file name = <Base_Dir><Package Name><PackageExtention>
-	private static final String _PackageExtention = ".zip";
+	private static final String _PackageExtention = ".jar";
 		
 	public static String BASE_DIR(){
 		return base_dir;
@@ -49,7 +49,7 @@ public class AppPreference   {
 		if(PackageID==null){
 			return null;
 		}
-		return base_dir+"/"+PackageID+ _PackageExtention;
+		return base_dir+"/"+PackageID;//+ _PackageExtention;
 	}
 	
 	public static void setCacheEnabled(boolean y){
