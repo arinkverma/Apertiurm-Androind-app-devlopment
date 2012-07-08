@@ -19,8 +19,7 @@ public class AppPreference   {
 	private static boolean _isClipBoardGetEnabled = false;
 	private static boolean _isClipBoardPushEnabled = false;
 	
-	private static String _SVNaddress = "https://apertium.svn.sourceforge.net/svnroot/apertium/branches/gsoc2012/artetxem/packages/jars/";//"https://apertium.svn.sourceforge.net/svnroot/apertium/branches/gsoc2012/arink/packages/";
-	
+	private static String _SVNaddress = "https://apertium.svn.sourceforge.net/svnroot/apertium/branches/gsoc2012/arink/Mikeljar/";
 	
 //Package file name = <Base_Dir><Package Name><PackageExtention>
 	private static final String _PackageExtention = ".jar";

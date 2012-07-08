@@ -38,6 +38,8 @@ import android.widget.Toast;
 
 
 public class ModeManageActivity extends ListActivity {
+	String TAG = "ModeManageActivity";
+	
 	private DatabaseHandler DB;
 	
 	//Rules Manager
@@ -214,8 +216,14 @@ public class ModeManageActivity extends ListActivity {
 			Log.i("CurrentMode", MODE);
 		}else{
 	    	try {
-	    		rulesHandler.setCurrentMode(MODE);	
-				Translator.setBase(rulesHandler.getClassLoader());
+	    		String currentPackage = rulesHandler.getCurrentPackage();
+	    		String PackageTOLoad = rulesHandler.findPackage(MODE);
+	    		Log.i(TAG,"CurrentPackage ="+currentPackage+", PackageToLoad="+PackageTOLoad+", ModeToset="+MODE);
+	    		
+    			rulesHandler.setCurrentMode(MODE);	
+	    		if(!PackageTOLoad.equals(currentPackage)){
+					Translator.setBase(rulesHandler.getClassLoader());
+	    		}
 				Translator.setCacheEnabled(AppPreference.isCacheEnabled());
 				Translator.setMode(MODE);
 				Log.e("CurrentMode",rulesHandler.getCurrentMode());

@@ -6,11 +6,6 @@
 package org.apertium.android;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 
 import org.apertium.android.DB.DatabaseHandler;
@@ -110,7 +105,7 @@ public class InstallActivity extends Activity implements OnClickListener {
 	/* Init View, 
 	 * Initialing view */
 	private void initView() {
-		Log.i("InstallActivity.InitView","Started");
+		Log.i(TAG,"InitView Started");
 	    Bundle extras = getIntent().getExtras();
 	    this._path = extras.getString("filepath");
 	    this._packageID = extras.getString("filename");

@@ -86,6 +86,13 @@ public class ApertiumActivity extends Activity implements OnClickListener{
     	
 		MODE = rulesHandler.getCurrentMode();
 		
+		rulesHandler.setCurrentMode(MODE);	
+		try {
+			Translator.setBase(rulesHandler.getClassLoader());
+		} catch (Exception e) {
+			Log.e(TAG,"Err while setting base Translator");
+		}
+		
 		initView();
 	    UpdateMode();
 		
@@ -107,8 +114,9 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 		}
 		
 		MODE = rulesHandler.getCurrentMode();
+		
 		_modeButton.setText(MODE);
-		Log.e(TAG,"onResume mode=" + rulesHandler.getCurrentMode());
+		Log.i(TAG,"onResume mode=" + rulesHandler.getCurrentMode());
 	}
 	  
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -251,8 +259,13 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	
 	private void UpdateMode(){			    	
     	try {
+    		String currentPackage = rulesHandler.getCurrentPackage();
+    		String PackageTOLoad = rulesHandler.findPackage(MODE);
+    		Log.i(TAG,"CurrentPackage ="+currentPackage+", "+PackageTOLoad);
     		rulesHandler.setCurrentMode(MODE);	
-			Translator.setBase(rulesHandler.getClassLoader());
+			if(!PackageTOLoad.equals(currentPackage)){
+    			Translator.setBase(rulesHandler.getClassLoader());
+    		}
 			Translator.setCacheEnabled(AppPreference.isCacheEnabled());
 			Translator.setMode(MODE);
 			_modeButton.setText(MODE);
