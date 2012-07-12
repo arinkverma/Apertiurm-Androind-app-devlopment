@@ -5,7 +5,10 @@
 
 package org.apertium.android.helper;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 
 
 public class AppPreference   {
@@ -14,16 +17,26 @@ public class AppPreference   {
 	private static final String temp_dir  = Environment.getExternalStorageDirectory().toString() +"/apertium/temp";
 	private static final String version = "2.0.1";
 	private static final String _RulePackage = "org.apertium.android.rule";
-	private static boolean _isCacheEnabled = false;
-	private static boolean _isMarkEnabled = false;
-	private static boolean _isClipBoardGetEnabled = false;
-	private static boolean _isClipBoardPushEnabled = false;
+	public static final String CachePref = "CachePref";
+	public static final String MarkPref = "MarkPref";
+	public static final String ClipBoardGetPref = "ClipGetPref";
+	public static final String ClipBoardPushPref = "ClipPushPref";
+	
+	private Context context = null;
 	
 	private static String _SVNaddress = "https://apertium.svn.sourceforge.net/svnroot/apertium/branches/gsoc2012/arink/Mikeljar/";
 	
 //Package file name = <Base_Dir><Package Name><PackageExtention>
 	private static final String _PackageExtention = ".jar";
-		
+	private SharedPreferences prefs = null;
+	private SharedPreferences.Editor editor;
+	
+	public AppPreference(Context ctx){
+		this.context = ctx;
+		this.prefs = PreferenceManager.getDefaultSharedPreferences(this.context);
+		this.editor = prefs.edit();
+	}
+	
 	public static String BASE_DIR(){
 		return base_dir;
 	}
@@ -51,36 +64,41 @@ public class AppPreference   {
 		return base_dir+"/"+PackageID;//+ _PackageExtention;
 	}
 	
-	public static void setCacheEnabled(boolean y){
-		_isCacheEnabled = y;
+	
+	public void setCacheEnabled(boolean y){
+		 editor.putBoolean(CachePref, y);
+		 editor.commit();
 	}
 	
-	public static boolean isCacheEnabled(){
-		return _isCacheEnabled;
+	public boolean isCacheEnabled(){
+        return prefs.getBoolean(CachePref, false);
 	}
 	
-	public static void setDisplayMark(boolean y){
-		_isMarkEnabled = y;
+	public void setDisplayMark(boolean y){
+		 editor.putBoolean(MarkPref, y);
+		 editor.commit();
 	}
 	
-	public static boolean isDisplayMarkEnabled(){
-		return _isMarkEnabled;
+	public boolean isDisplayMarkEnabled(){
+		return prefs.getBoolean(MarkPref, false);
 	}
 	
-	public static void setClipBoardPush(boolean y){
-		_isClipBoardPushEnabled = y;
+	public void setClipBoardPush(boolean y){
+		 editor.putBoolean(ClipBoardPushPref, y);
+		 editor.commit();
 	}
 	
-	public static boolean isClipBoardPushEnabled(){
-		return _isClipBoardPushEnabled;
+	public boolean isClipBoardPushEnabled(){
+		return prefs.getBoolean(ClipBoardPushPref, false);
 	}
 	
-	public static void setClipBoardGet(boolean y){
-		_isClipBoardGetEnabled = y;
+	public void setClipBoardGet(boolean y){
+		 editor.putBoolean(ClipBoardGetPref, y);
+		 editor.commit();
 	}
 	
-	public static boolean isClipBoardGetEnabled(){
-		return _isClipBoardGetEnabled;
+	public boolean isClipBoardGetEnabled(){
+		return prefs.getBoolean(ClipBoardGetPref, false);
 	}
 	
 	

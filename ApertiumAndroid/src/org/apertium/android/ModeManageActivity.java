@@ -51,10 +51,14 @@ public class ModeManageActivity extends ListActivity {
 	private static String packagetoRemove;
 	private String PrefToSet = null;
 
+	private AppPreference appPreference = null;
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
+	    
+	    
+	    appPreference = new AppPreference(this);
 	    
 	    Intent intent = getIntent();
 		Bundle extras = intent.getExtras();
@@ -224,7 +228,7 @@ public class ModeManageActivity extends ListActivity {
 	    		if(!PackageTOLoad.equals(currentPackage)){
 					Translator.setBase(rulesHandler.getClassLoader());
 	    		}
-				Translator.setCacheEnabled(AppPreference.isCacheEnabled());
+				Translator.setCacheEnabled(appPreference.isCacheEnabled());
 				Translator.setMode(MODE);
 				Log.e("CurrentMode",rulesHandler.getCurrentMode());
 			} catch (Exception e) {

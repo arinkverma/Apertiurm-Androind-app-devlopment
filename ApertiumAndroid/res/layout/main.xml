@@ -18,13 +18,20 @@
 
         <Button
             android:id="@+id/translateButton"
-            android:layout_width="192dp"
+            android:layout_width="137dp"
             android:layout_height="wrap_content"
             android:text="@string/translateButton" />
 
         <Button
+            android:id="@+id/clearButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.14"
+            android:text="@string/clear" />
+
+        <Button
             android:id="@+id/modeButton"
-            android:layout_width="match_parent"
+            android:layout_width="113dp"
             android:layout_height="wrap_content"
             android:text="@string/language" />
     </LinearLayout>

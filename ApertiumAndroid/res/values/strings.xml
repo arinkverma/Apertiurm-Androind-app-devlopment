@@ -23,6 +23,7 @@
     <string name="widgetAddButton">+</string>
     <string name="widgetConfigButton">*</string>
     <string name="widgetTitle">Desktop Widget</string>
+    <string name="clear">Clear</string>
     
 
 </resources>
