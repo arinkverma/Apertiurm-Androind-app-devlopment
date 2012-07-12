@@ -38,25 +38,25 @@ import android.widget.Toast;
 
 
 public class ApertiumActivity extends Activity implements OnClickListener{
-	
+
 	private final String TAG = "ApertiumActiviy";
 
-	private static String MODE = "??-??";
+	private static String MODE = null;
 	private String outputText = null;
 
-	//Text Fields 
+	//Text Fields
 	private EditText _inputText;
 	private TextView _outputText;
-	
+
 	//Button
 	private Button _submitButton,_modeButton,_clearButton;
 	private ProgressDialog progressDialog;
 	private DatabaseHandler DB;
-	
+
 	//Rules Manager
 	private RulesHandler rulesHandler;
-	
-	
+
+
 	//Clipboard
 	ClipboardHandler clipboardHandler = null;
 
@@ -64,19 +64,19 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	AppPreference appPreference = null;
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);		
+		super.onCreate(savedInstanceState);
 		appPreference = new AppPreference(this);
 		FileManager.setDIR();
-		
+
 		Log.i(TAG,""+appPreference.isCacheEnabled()+appPreference.isClipBoardGetEnabled()+appPreference.isClipBoardPushEnabled()+appPreference.isDisplayMarkEnabled());
-		
+
 		DB = new DatabaseHandler(this.getBaseContext());
-		rulesHandler = new RulesHandler(this.getBaseContext());		
+		rulesHandler = new RulesHandler(this.getBaseContext());
 		clipboardHandler = new ClipboardHandler(this);
-		
+
 		Intent intent = getIntent();
 		Bundle extras = intent.getExtras();
-		
+
 		if (extras != null) {
 			MODE = extras.getString("Mode");
 			Log.i(TAG,"MODE set from other activity"+MODE);
@@ -84,24 +84,21 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 				rulesHandler.setCurrentMode(MODE);
 			}
 		}
-		
-    	
-		MODE = rulesHandler.getCurrentMode();
-		
+
+
+
 		try {
 			Translator.setBase(rulesHandler.getClassLoader());
-			Translator.setCacheEnabled(appPreference.isCacheEnabled());
-			Translator.setMode(MODE);
 		} catch (Exception e) {
 			Log.e(TAG, "Error while loading class");
-		}    			
-		
+		}
+
 		initView();
-		
+
 		Log.i(TAG,"Created with Mode"+MODE);
 	}
-	
-	
+
+
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -114,18 +111,18 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 				rulesHandler.setCurrentMode(MODE);
 			}
 		}
-		
-		MODE = rulesHandler.getCurrentMode();		
+
+		MODE = rulesHandler.getCurrentMode();
 		UpdateMode();
 		Log.i(TAG,"onResume mode=" + rulesHandler.getCurrentMode());
 	}
-	  
+
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 	    inflater.inflate(R.menu.option_menu, menu);
 	    return true;
 	 }
-	
+
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 			case R.id.manage:
@@ -141,9 +138,9 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 				return super.onOptionsItemSelected(item);
 		}
 	}
-	
-	
-	/* Init View, 
+
+
+	/* Init View,
 	 * Initialing view */
 	private void initView() {
 		Log.i(TAG,"ApertiumActivity.InitView Started");
@@ -152,46 +149,45 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 		if(appPreference.isClipBoardGetEnabled()){
 			_inputText.setText(clipboardHandler.getText());
 		}
-		
+
 		_submitButton 	= (Button) findViewById(R.id.translateButton);
 		_outputText 	= (TextView) findViewById(R.id.outputtext);
 		_modeButton 	= (Button) findViewById(R.id.modeButton);
 		_clearButton	= (Button) findViewById(R.id.clearButton);
-		
-		_submitButton.setOnClickListener(this);
-		_modeButton.setOnClickListener(this);	
-		_clearButton.setOnClickListener(this);	
-		_modeButton.setText(MODE);   
-		 	 	
-	}
-	
 
-	/* Translation Thread, 
+		_submitButton.setOnClickListener(this);
+		_modeButton.setOnClickListener(this);
+		_clearButton.setOnClickListener(this);
+	}
+
+
+	/* Translation Thread,
 	 * Load translation rules and excute lttoolbox.jar */
 	private void TranslationRun(){
-		
+
 	    Thread t = new Thread() {
 	        @Override
 	        public void run() {
-		   		 String inputText = _inputText.getText().toString();		 
+		   		 String inputText = _inputText.getText().toString();
 				 if (!TextUtils.isEmpty(inputText)) {
-					 	outputText = "";  
-					 
-					
-				        
-				     try {				  
+					 	outputText = "";
+
+
+
+						try {
+							Translator.setCacheEnabled(appPreference.isCacheEnabled());
 				    	Log.i(TAG,"Translator Run Cache ="+appPreference.isCacheEnabled()+", Mark ="+appPreference.isDisplayMarkEnabled()+ ", MODE = "+MODE);
 				    	Translator.setDisplayMarks(appPreference.isDisplayMarkEnabled());
 						outputText  = Translator.translate(_inputText.getText().toString());
-						
+
 						if(appPreference.isClipBoardPushEnabled()){
 							clipboardHandler.putText(outputText);
 						}
-						
-						
+
+
 				     	} catch (Exception e) {
 							 Log.e(TAG,"ApertiumActivity.TranslationRun MODE ="+MODE+";InputText = "+_inputText.getText());
-				        }		
+				        }
 				}
 	            Message msg = Message.obtain();
 	            msg.what = 1;
@@ -200,9 +196,9 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	    };
 	    t.start();
 	}
-	
-	
-	
+
+
+
 
 
 	/* Waiting for Acknowledgement from threads running */
@@ -212,10 +208,10 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	        switch(msg.what){
 	        case 1:
 	        	_outputText.setText(outputText);
-	        	progressDialog.dismiss();	        	
+	        	progressDialog.dismiss();
 	            break;
 	        case 2:
-	        	progressDialog.dismiss();	
+	        	progressDialog.dismiss();
 	        	try {
 					Translator.setBase(rulesHandler.getClassLoader());
 				} catch (Exception e) {
@@ -227,7 +223,7 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	    }
 	};
 
-		
+
 	@Override
 	public void onLowMemory(){
 		Log.e(TAG, "low");
@@ -235,23 +231,44 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 		Translator.setCacheEnabled(false);
 		appPreference.setCacheEnabled(false);
 	}
-	
+
 	@Override
 	public void onClick(View v) {
-		if (v.equals(_submitButton)){	
+		if (v.equals(_submitButton)){
 				progressDialog = ProgressDialog.show(this, "", "Translating..",  true,false);
 				TranslationRun();
-		}else if(v.equals(_modeButton) && !MODE.equals("??-??")){
+		}else if(v.equals(_modeButton)){
+			if (MODE==null) {
+
+				if (DB.getAllModes().isEmpty()) {
+					/*
+					new AlertDialog.Builder(this)
+					.setTitle("Install language pairs")
+					.setMessage("You need to download or install some language translations pairs")
+					.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface arg0, int arg1) {
+							startActivity(new Intent(ApertiumActivity.this, InstallActivity.class));
+						}
+					}).show();
+					*/
+					// No modes, go to download
+					startActivity(new Intent(ApertiumActivity.this, DownloadActivity.class));
+				} else {
+					startActivity(new Intent(ApertiumActivity.this, ModeManageActivity.class));
+				}
+				return;
+			}
+
 			TranslationMode M = DB.getMode(MODE);
 			List<TranslationMode> ModeList = DB.getModes(M.getPackage());
 			final String[] ModeTitle = new String[ModeList.size()];
-		    final String[] ModeId = new String[ModeList.size()];
+			final String[] ModeId = new String[ModeList.size()];
 			for(int i=0;i<ModeList.size();i++){
 				TranslationMode m = ModeList.get(i);
 				ModeTitle[i] = m.getTitle();
 				ModeId[i] 	= m.getID();
 			}
-			
+
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle("Select mode");
 			builder.setItems(ModeTitle, new DialogInterface.OnClickListener() {
@@ -259,19 +276,19 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 			    	rulesHandler.setCurrentMode(ModeId[position]);
 				    Toast.makeText(getApplicationContext(), ModeTitle[position],   Toast.LENGTH_SHORT).show();
 				    MODE = ModeId[position];
-				    UpdateMode();				
+				    UpdateMode();
 			    }
 			});
 			AlertDialog alert = builder.create();
-			alert.show();		
+			alert.show();
 		}else if(v.equals(_clearButton)){
 			_outputText.setText("");
 			_inputText.setText("");
 		}
-				  
+
 	}
-	
-	/* Share text 
+
+	/* Share text
 	 * Intent to share translated text over other installed application services */
 	private void share_text() {
 		Log.i(TAG,"ApertiumActivity.share_text Started");
@@ -281,26 +298,33 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 		sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, outputText);
 		startActivity(Intent.createChooser(sharingIntent, "Share via"));
 	}
-	
-	private void UpdateMode(){			    	
+
+	private void UpdateMode(){
+		if (MODE==null) {
+			_submitButton.setEnabled(false);
+			_modeButton.setText(DB.getAllModes().isEmpty()?"Install languages":"select");
+			return;
+		}
+		_submitButton.setEnabled(true);
+
+
     	try {
     		String currentPackage = rulesHandler.getCurrentPackage();
     		String PackageTOLoad = rulesHandler.findPackage(MODE);
     		Log.i(TAG,"CurrentPackage ="+currentPackage+", "+PackageTOLoad);
     		if(!currentPackage.equals(PackageTOLoad) && appPreference.isCacheEnabled()){
     			Translator.clearCache();
-    			Translator.setBase(rulesHandler.getClassLoader());    			
-    		}    		
-    		
-    		rulesHandler.setCurrentMode(MODE);	    		
-			Translator.setCacheEnabled(appPreference.isCacheEnabled());
+    			Translator.setBase(rulesHandler.getClassLoader());
+    		}
+
+    		rulesHandler.setCurrentMode(MODE);
 			Translator.setMode(MODE);
 			_modeButton.setText(MODE);
 			Log.i(TAG,"UpdateMode ="+MODE+", cache= "+appPreference.isCacheEnabled());
 		} catch (Exception e) {
 			Log.e(TAG,"UpdateMode "+e);
 		}
-    	
+
 	}
-	
+
 }
