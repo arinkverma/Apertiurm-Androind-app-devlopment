@@ -39,12 +39,12 @@ import android.widget.Toast;
 
 public class ModeManageActivity extends ListActivity {
 	String TAG = "ModeManageActivity";
-	
+
 	private DatabaseHandler DB;
-	
+
 	//Rules Manager
 	private RulesHandler rulesHandler;
-	
+
 	/* List of installed modes*/
 	private List<TranslationMode> L;
 	private static ProgressDialog progressDialog;
@@ -56,38 +56,38 @@ public class ModeManageActivity extends ListActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
-	    
-	    
+
+
 	    appPreference = new AppPreference(this);
-	    
+
 	    Intent intent = getIntent();
 		Bundle extras = intent.getExtras();
 	    if (extras != null) {
 	    	PrefToSet = extras.getString("PrefToSet");
 		}
-	    
+
 		DB = new DatabaseHandler(this.getBaseContext());
 		rulesHandler = new RulesHandler(this.getBaseContext());
 	    L = DB.getAllModes();
 	    int len = L.size();
 	    final String[] ModeTitle = new String[len];
 	    final String[] ModeId = new String[len];
-	   
+
 	    for (int i = 0; i < L.size(); i++) {
 	    	TranslationMode m = L.get(i);
 	    	ModeTitle[i] = m.getTitle();
 	        ModeId[i] 	= m.getID();
 	    }
-	    
+
 	    ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, android.R.id.text1, ModeTitle);
 
 	    this.setListAdapter(adapter);
-	    
+
 
 	    ListView lv = getListView();
 	    lv.setTextFilterEnabled(true);
-	    
-	    
+
+
 	    //Set current mode on click
 	    lv.setOnItemClickListener(new OnItemClickListener() {
 			@Override
@@ -98,26 +98,26 @@ public class ModeManageActivity extends ListActivity {
 			    finish();
 			}
 	    });
-	    
+
 	    //Actions on Mode, on LongPress
 	    lv.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 	        @Override
 	        public boolean onItemLongClick(AdapterView<?> av, View v, int pos, final long id) {
 	            final AlertDialog.Builder b = new AlertDialog.Builder(ModeManageActivity.this);
 	            b.setIcon(android.R.drawable.ic_dialog_alert);
-	           
+
 	            final TranslationMode tobeRemove = DB.getMode(ModeId[pos]);
-	            
+
 	            final String pack = tobeRemove.getPackage();
 	            b.setMessage("Are you sure want to remove this package?");
 	            b.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 	                    public void onClick(DialogInterface dialog, int whichButton) {
 	                    	packagetoRemove = pack;
-	                    	
-	                    	run0();			 
-	                    	
+
+	                    	run0();
+
 	        	            if(tobeRemove.getPackage().equals(rulesHandler.getCurrentPackage())){
-	        	            	rulesHandler.resetCurrentMode();	            	
+	        	            	rulesHandler.resetCurrentMode();
 	        	            }
 	                    }
 	            });
@@ -132,15 +132,15 @@ public class ModeManageActivity extends ListActivity {
 	            return true;
 	        }
 	    });
-			
+
 	}
-	
+
 	public boolean onCreateOptionsMenu(Menu menu) {
 	      MenuInflater inflater = getMenuInflater();
 	      inflater.inflate(R.menu.manage_menu, menu);
 	      return true;
 	 }
-	
+
 	public boolean onOptionsItemSelected(MenuItem item) {
 	      switch (item.getItemId()) {
 	      case R.id.install:
@@ -151,11 +151,11 @@ public class ModeManageActivity extends ListActivity {
 	            return super.onOptionsItemSelected(item);
 	      }
 	}
-	
-	
+
+
 	/*Removing Package Entries*/
-	
-	private void run0(){		
+
+	private void run0(){
 		progressDialog = ProgressDialog.show(this, "Removing..", "Removing database entries", true,false);
 	    Thread t = new Thread() {
 	        @Override
@@ -172,10 +172,10 @@ public class ModeManageActivity extends ListActivity {
 	        }
 	    };
 	    t.start();
-	}	
-	
+	}
+
 	/*Removing Package files*/
-	private void run1(){		
+	private void run1(){
 		Thread t = new Thread() {
 	        @Override
 	        public void run() {
@@ -190,29 +190,29 @@ public class ModeManageActivity extends ListActivity {
 	        }
 	    };
 	    t.start();
-	}	
-	
+	}
+
 	private Handler handler = new Handler(){
 	    @Override
 	    public void handleMessage(Message msg) {
 	        switch(msg.what){
-	        case 0:     
+	        case 0:
 	        	progressDialog.setMessage("Removing files");
 	        	run1();
 	            break;
 	        case 1:
 	        	progressDialog.dismiss();
 	        	Intent myIntent1 = new Intent(ModeManageActivity.this,ModeManageActivity.class);
-	        	ModeManageActivity.this.startActivity(myIntent1);	        	
+	        	ModeManageActivity.this.startActivity(myIntent1);
 	        	finish();
 	            break;
 	        }
 	    }
 	};
-	
-	
-	
-	private void UpdateMode(String MODE){		
+
+
+
+	private void UpdateMode(String MODE){
 		if(PrefToSet !=null ){
 			Intent intent = getIntent();
 		    intent.putExtra("Mode", MODE);
@@ -223,26 +223,25 @@ public class ModeManageActivity extends ListActivity {
 	    		String currentPackage = rulesHandler.getCurrentPackage();
 	    		String PackageTOLoad = rulesHandler.findPackage(MODE);
 	    		Log.i(TAG,"CurrentPackage ="+currentPackage+", PackageToLoad="+PackageTOLoad+", ModeToset="+MODE);
-	    		
-    			rulesHandler.setCurrentMode(MODE);	
+
+    			rulesHandler.setCurrentMode(MODE);
 	    		if(!PackageTOLoad.equals(currentPackage)){
 					Translator.setBase(rulesHandler.getClassLoader());
 	    		}
-				Translator.setCacheEnabled(appPreference.isCacheEnabled());
 				Translator.setMode(MODE);
 				Log.e("CurrentMode",rulesHandler.getCurrentMode());
 			} catch (Exception e) {
 				e.printStackTrace();
-			}	
+			}
 		}
 	}
 
-	
+
 	@Override
     public void onBackPressed(){
 		Intent intent = getIntent();
 	    intent.putExtra("Mode", "+");
 	    setResult(RESULT_CANCELED, intent);
-	    finish();	
+	    finish();
     }
 }

@@ -42,6 +42,8 @@
         android:layout_height="120dp"
         android:layout_weight="0.5"
         android:inputType="text|textMultiLine"
+        android:hint="Translated text will appear here"
+        android:enabled="false"
         android:text="" />
 
 </LinearLayout>
