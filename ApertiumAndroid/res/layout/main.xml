@@ -18,22 +18,31 @@
 
         <Button
             android:id="@+id/translateButton"
-            android:layout_width="137dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_weight="1.2"
             android:text="@string/translateButton" />
 
         <Button
-            android:id="@+id/clearButton"
-            android:layout_width="0dp"
+            android:id="@+id/fromButton"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1.14"
-            android:text="@string/clear" />
+            android:layout_weight="1"
+            android:text="@string/from" />
+        
+        <Button
+            android:id="@+id/modeSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight=".3"
+            android:text="@string/arrow" />
 
         <Button
-            android:id="@+id/modeButton"
-            android:layout_width="113dp"
+            android:id="@+id/toButton"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/language" />
+            android:layout_weight="1"
+            android:text="@string/to" />
     </LinearLayout>
 
     <EditText
@@ -42,7 +51,7 @@
         android:layout_height="120dp"
         android:layout_weight="0.5"
         android:inputType="text|textMultiLine"
-        android:hint="Translated text will appear here"
+        android:hint="@string/translateHint"
         android:enabled="false"
         android:text="" />
 

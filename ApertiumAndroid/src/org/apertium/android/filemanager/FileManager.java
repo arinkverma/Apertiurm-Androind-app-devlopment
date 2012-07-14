@@ -13,6 +13,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.zip.ZipEntry;
@@ -22,8 +23,11 @@ import org.apertium.android.helper.AppPreference;
 
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 public class FileManager {
+	
+	static String TAG = "FileManager";
 	
 	public static void copyFile(InputStream in, OutputStream out) throws IOException {
 	    byte[] buffer = new byte[1024];
@@ -208,4 +212,51 @@ public class FileManager {
 	    t.start();
 	}
 	
+	
+	public static void FileInfoRun(final String Source,final Handler handler){
+	    Thread t = new Thread() {
+	        @Override
+	        public void run() {
+				URL url;
+				URLConnection conn;
+				int FileSize = 0, lastSlash;
+				String ModifiedSince = null;
+				String FileName = null;
+				
+				Message msg;
+	                
+            
+				msg = Message.obtain();
+				msg.what = MESSAGE_CONNECTING_STARTED;
+				handler.sendMessage(msg);
+	                
+                try {
+					url = new URL(Source);
+					conn = url.openConnection();
+                    conn.setUseCaches(false);
+                    FileSize = conn.getContentLength();
+                    ModifiedSince = conn.getLastModified()+"";           
+                    // get the filename
+                    lastSlash = url.toString().lastIndexOf('/');
+                    FileName = "file.txt";
+                    if(lastSlash >=0) {
+                            FileName = url.toString().substring(lastSlash + 1);
+                    }
+                    if(FileName.equals("")) {
+                            FileName = "untitled";
+                    }
+				} catch (MalformedURLException e) {
+					Log.e(TAG,e+"");
+				} catch (IOException e) {
+					Log.e(TAG,e+"");
+				}
+	                        
+                // notify download start
+                int fileSizeInKB = FileSize / 1024;
+                msg = Message.obtain(handler, MESSAGE_DOWNLOAD_STARTED, fileSizeInKB , 0, ModifiedSince);
+	            handler.sendMessage(msg);	              
+	        }
+	    };
+	    t.start();
+	}
 }

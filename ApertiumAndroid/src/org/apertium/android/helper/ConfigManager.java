@@ -26,7 +26,7 @@ public class ConfigManager {
 			this.modesID = Translator.getAvailableModes();
 			modes = new ArrayList<TranslationMode>();
 			for(int i=0;i<this.modesID.length;i++){
-				TranslationMode M = new TranslationMode(this.modesID[i], this.modesID[i]);
+				TranslationMode M = new TranslationMode(this.modesID[i], Translator.getTitle(this.modesID[i]));
 				modes.add(M);
 			}
 			

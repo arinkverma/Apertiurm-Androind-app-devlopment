@@ -17,9 +17,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class DatabaseHandler {
-	 
+	private static final String TAG = "DatabaseHandler";
+	
     // All Static variables
     // Database Version
     private static final int DATABASE_VERSION = 1;
@@ -79,6 +81,10 @@ public class DatabaseHandler {
     }
      
      
+    /***
+     * Modes related queries
+     * 
+     */
     // Get all modes
     public List<TranslationMode> getAllModes() {
     	OpenHelper openHelper = new OpenHelper(this.context);
@@ -107,8 +113,74 @@ public class DatabaseHandler {
         return LangList;    	
     }
     
+    // Get mode id of translation language from , language to
+	public String getModeID(String From,String To){
+		Log.i(TAG,"From="+From+",To="+To);
+		OpenHelper openHelper = new OpenHelper(this.context);
+		SQLiteDatabase db = openHelper.getReadableDatabase();	       
+		String ID = null;
+		// Select All Query
+		String selectQuery = "SELECT  * FROM " + TABLE_MODE + " WHERE "+KEY_MODE_TITLE+" LIKE '"+From+"%"+To+"' ORDER BY "+KEY_MODE_TITLE+" ASC";
+		Log.i("SQL",selectQuery);
+		Cursor cursor = db.rawQuery(selectQuery, null);
+		if (cursor.moveToFirst()) {
+			ID = cursor.getString(0);	//Id
+		}
+		db.close();
+		return ID;	   
+	}
     
-    //Get modes from Package
+	// Get title of all language available which has translation from
+	public String[] getModeTitlesOut(){
+		List<String> TitleList = new ArrayList<String>();
+		List<TranslationMode> LangList = this.getAllModes();
+		    	 
+		for(int i=0;i<LangList.size();i++){
+			TranslationMode m = LangList.get(i);
+			String []s = m.getTitle().split("[^\\w]+");
+			if(!TitleList.contains(s[0])){
+				TitleList.add(s[0]);
+			}
+		}    	 
+		
+		String[] Array = new String[TitleList.size()];
+		for(int i=0;i<TitleList.size();i++){
+			Array[i] = TitleList.get(i);
+		}
+		return Array;
+	}
+    
+    // Get mode ids of incoming translation from argumented mode
+   public String[] getModeTitlesInFrom(String ModeTile){
+		OpenHelper openHelper = new OpenHelper(this.context);
+	    SQLiteDatabase db = openHelper.getReadableDatabase();	   
+	   	List<String> TitleList = new ArrayList<String>();
+        
+        // Select All Query
+        String selectQuery = "SELECT  * FROM " + TABLE_MODE + " WHERE "+KEY_MODE_TITLE+" LIKE '"+ModeTile+"%' ORDER BY "+KEY_MODE_TITLE+" ASC";
+    	Log.i("SQL",selectQuery);
+        Cursor cursor = db.rawQuery(selectQuery, null);
+     
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                String []s 	= cursor.getString(1).split("[^\\w]+");	//Title
+                //Ignoring first word
+    			if(!TitleList.contains(s[1])){
+    				TitleList.add(s[1]);
+    			}
+    		} while (cursor.moveToNext());
+        }
+        db.close();
+        
+        String[] Array = new String[TitleList.size()];
+		for(int i=0;i<TitleList.size();i++){
+			Array[i] = TitleList.get(i);
+		}
+		return Array;
+   }
+    
+    //Get modes from Package id
     public List<TranslationMode> getModes(String Package_ID) {
     	OpenHelper openHelper = new OpenHelper(this.context);
 	    SQLiteDatabase db = openHelper.getReadableDatabase();
@@ -136,6 +208,7 @@ public class DatabaseHandler {
         return LangList;    	
     }
      
+    //Get last modified date in seconds
     public String getLastModifiedDate(String Package_ID){
     	OpenHelper openHelper = new OpenHelper(this.context);
 	    SQLiteDatabase db = openHelper.getReadableDatabase();
@@ -152,7 +225,7 @@ public class DatabaseHandler {
         return M;  
     }
     
-    //Get modes from Package
+    //Get mode by id
     public TranslationMode getMode(String Mode_ID) {
     	OpenHelper openHelper = new OpenHelper(this.context);
 	    SQLiteDatabase db = openHelper.getReadableDatabase();
@@ -173,8 +246,6 @@ public class DatabaseHandler {
         db.close();
         return M;    	
     }
-    
-    
     
     //Get Package from modes 
     public LanguagePackage getPackage(String Package_ID) {

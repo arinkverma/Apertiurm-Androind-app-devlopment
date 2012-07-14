@@ -6,8 +6,6 @@
 
 package org.apertium.android;
 
-import java.util.List;
-
 import org.apertium.Translator;
 import org.apertium.android.DB.DatabaseHandler;
 import org.apertium.android.filemanager.FileManager;
@@ -42,6 +40,8 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	private final String TAG = "ApertiumActiviy";
 
 	private static String MODE = null;
+	private static String FROM_TITLE = null;
+	private static String TO_TITLE = null;
 	private String outputText = null;
 
 	//Text Fields
@@ -49,12 +49,13 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	private TextView _outputText;
 
 	//Button
-	private Button _submitButton,_modeButton,_clearButton;
+	private Button _submitButton,_toButton,_fromButton,_dirButton;
 	private ProgressDialog progressDialog;
 	private DatabaseHandler DB;
 
 	//Rules Manager
 	private RulesHandler rulesHandler;
+	private TranslationMode translationMode;
 
 
 	//Clipboard
@@ -84,8 +85,6 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 				rulesHandler.setCurrentMode(MODE);
 			}
 		}
-
-
 
 		try {
 			Translator.setBase(rulesHandler.getClassLoader());
@@ -150,14 +149,16 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 			_inputText.setText(clipboardHandler.getText());
 		}
 
-		_submitButton 	= (Button) findViewById(R.id.translateButton);
+		_submitButton	= (Button) findViewById(R.id.translateButton);
 		_outputText 	= (TextView) findViewById(R.id.outputtext);
-		_modeButton 	= (Button) findViewById(R.id.modeButton);
-		_clearButton	= (Button) findViewById(R.id.clearButton);
+		_toButton 		= (Button) findViewById(R.id.toButton);
+		_fromButton		= (Button) findViewById(R.id.fromButton);
+		_dirButton 		= (Button) findViewById(R.id.modeSwitch);
 
 		_submitButton.setOnClickListener(this);
-		_modeButton.setOnClickListener(this);
-		_clearButton.setOnClickListener(this);
+		_toButton.setOnClickListener(this);
+		_fromButton.setOnClickListener(this);
+		_dirButton.setOnClickListener(this);
 	}
 
 
@@ -171,8 +172,6 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 		   		 String inputText = _inputText.getText().toString();
 				 if (!TextUtils.isEmpty(inputText)) {
 					 	outputText = "";
-
-
 
 						try {
 							Translator.setCacheEnabled(appPreference.isCacheEnabled());
@@ -196,9 +195,6 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	    };
 	    t.start();
 	}
-
-
-
 
 
 	/* Waiting for Acknowledgement from threads running */
@@ -234,56 +230,81 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 
 	@Override
 	public void onClick(View v) {
+		
 		if (v.equals(_submitButton)){
 				progressDialog = ProgressDialog.show(this, "", "Translating..",  true,false);
 				TranslationRun();
-		}else if(v.equals(_modeButton)){
+		}else if(v.equals(_fromButton)){
 			if (MODE==null) {
-
-				if (DB.getAllModes().isEmpty()) {
-					/*
-					new AlertDialog.Builder(this)
-					.setTitle("Install language pairs")
-					.setMessage("You need to download or install some language translations pairs")
-					.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface arg0, int arg1) {
-							startActivity(new Intent(ApertiumActivity.this, InstallActivity.class));
-						}
-					}).show();
-					*/
+				if (DB.getAllModes().isEmpty()) {					
 					// No modes, go to download
 					startActivity(new Intent(ApertiumActivity.this, DownloadActivity.class));
-				} else {
+				} /*else {
 					startActivity(new Intent(ApertiumActivity.this, ModeManageActivity.class));
-				}
+				}*/
 				return;
 			}
-
-			TranslationMode M = DB.getMode(MODE);
-			List<TranslationMode> ModeList = DB.getModes(M.getPackage());
-			final String[] ModeTitle = new String[ModeList.size()];
-			final String[] ModeId = new String[ModeList.size()];
-			for(int i=0;i<ModeList.size();i++){
-				TranslationMode m = ModeList.get(i);
-				ModeTitle[i] = m.getTitle();
-				ModeId[i] 	= m.getID();
-			}
+			
+			final String[] ModeTitle = DB.getModeTitlesOut();			
 
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle("Select mode");
+			builder.setTitle("Translate from");
 			builder.setItems(ModeTitle, new DialogInterface.OnClickListener() {
 			    public void onClick(DialogInterface dialog, int position) {
-			    	rulesHandler.setCurrentMode(ModeId[position]);
 				    Toast.makeText(getApplicationContext(), ModeTitle[position],   Toast.LENGTH_SHORT).show();
-				    MODE = ModeId[position];
-				    UpdateMode();
+				    FROM_TITLE = ModeTitle[position];
+				    TO_TITLE = null;
+				    _fromButton.setText(FROM_TITLE);
+				    _toButton.setText(R.string.to);				    
 			    }
 			});
 			AlertDialog alert = builder.create();
 			alert.show();
-		}else if(v.equals(_clearButton)){
-			_outputText.setText("");
-			_inputText.setText("");
+		}else if(v.equals(_toButton)){
+			if (MODE==null) {
+
+				if (DB.getAllModes().isEmpty()) {
+					
+					// No modes, go to download
+					startActivity(new Intent(ApertiumActivity.this, DownloadActivity.class));
+					return;
+				} /*else {
+					startActivity(new Intent(ApertiumActivity.this, ModeManageActivity.class));
+				}*/
+				
+			}
+
+			final String[] ModeTitle =  DB.getModeTitlesInFrom(FROM_TITLE);
+			
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle("Translate to");
+			builder.setItems(ModeTitle, new DialogInterface.OnClickListener() {
+			    public void onClick(DialogInterface dialog, int position) {
+			    	Toast.makeText(getApplicationContext(), ModeTitle[position],   Toast.LENGTH_SHORT).show();
+				    TO_TITLE = ModeTitle[position];
+				    _toButton.setText(TO_TITLE);
+				    Log.i(TAG,DB.getModeID(FROM_TITLE,TO_TITLE));
+				    MODE = DB.getModeID(FROM_TITLE,TO_TITLE);
+				    UpdateMode();
+			    }
+			});
+			
+			AlertDialog alert = builder.create();
+			alert.show();
+		}else if(v.equals(_dirButton)){
+			String temp = FROM_TITLE;
+			FROM_TITLE = TO_TITLE;
+			TO_TITLE = temp;
+			temp = DB.getModeID(FROM_TITLE,TO_TITLE);
+			if(temp == null){
+				Toast.makeText(getApplicationContext(), "There is no mode from "+FROM_TITLE+" to "+TO_TITLE,   Toast.LENGTH_SHORT).show();
+				temp = FROM_TITLE;
+				FROM_TITLE = TO_TITLE;
+				TO_TITLE = temp;				  
+			}else{
+				MODE = temp;
+				UpdateMode();
+			}
 		}
 
 	}
@@ -302,27 +323,46 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	private void UpdateMode(){
 		if (MODE==null) {
 			_submitButton.setEnabled(false);
-			_modeButton.setText(DB.getAllModes().isEmpty()?"Install languages":"select");
+			_toButton.setText(DB.getAllModes().isEmpty()?"Install languages":"select");
+			_fromButton.setText(DB.getAllModes().isEmpty()?"Install languages":"select");
 			return;
 		}
 		_submitButton.setEnabled(true);
+		
+
+		Log.i(TAG,"UpdateMode ="+MODE+", cache= "+appPreference.isCacheEnabled());
 
 
     	try {
     		String currentPackage = rulesHandler.getCurrentPackage();
     		String PackageTOLoad = rulesHandler.findPackage(MODE);
-    		Log.i(TAG,"CurrentPackage ="+currentPackage+", "+PackageTOLoad);
-    		if(!currentPackage.equals(PackageTOLoad) && appPreference.isCacheEnabled()){
-    			Translator.clearCache();
+    		
+    		//If mode is changed
+    		if(!MODE.equals(rulesHandler.getCurrentMode())){
+    			Log.i(TAG,"setCurrentMode="+MODE);    			
+    			rulesHandler.setCurrentMode(MODE);
+    		}
+    		
+    		//If package is changed
+    		if(!currentPackage.equals(PackageTOLoad)){
+    			Log.i(TAG,"setBase="+PackageTOLoad+" CurrentPackage ="+currentPackage+", "+PackageTOLoad);
+    			if(appPreference.isCacheEnabled()){
+    				Translator.clearCache();
+    			}
     			Translator.setBase(rulesHandler.getClassLoader());
     		}
 
-    		rulesHandler.setCurrentMode(MODE);
+    		
 			Translator.setMode(MODE);
-			_modeButton.setText(MODE);
-			Log.i(TAG,"UpdateMode ="+MODE+", cache= "+appPreference.isCacheEnabled());
+
+			translationMode = DB.getMode(MODE);
+			FROM_TITLE = translationMode.getFrom();
+			TO_TITLE = translationMode.getTo();
+			
+			_toButton.setText(TO_TITLE);
+			_fromButton.setText(FROM_TITLE);
 		} catch (Exception e) {
-			Log.e(TAG,"UpdateMode "+e);
+			Log.e(TAG,"UpdateMode "+e+"Mode = "+MODE);
 		}
 
 	}

@@ -11,7 +11,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apertium.Translator;
@@ -38,7 +43,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class DownloadActivity extends Activity implements OnClickListener{
+public class DownloadActivity extends Activity {
 	public static final String TAG = "DownloadActivity";
 
 
@@ -51,7 +56,6 @@ public class DownloadActivity extends Activity implements OnClickListener{
     private boolean isListLoaded = false;
 
     private ListView listView;
-    private Button _submitButton;
     private String []LIST = null;
     private String []Address = null;
     private String toDownload = null;
@@ -59,15 +63,13 @@ public class DownloadActivity extends Activity implements OnClickListener{
     private String ModifiedSince = null;
     private DatabaseHandler DB = null;
 
-
+  
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
 	    setContentView(R.layout.svnlayout);
 	    listView  = (ListView) findViewById(R.id.listView1);
-	    _submitButton 	= (Button) findViewById(R.id.button1);
-	    _submitButton.setOnClickListener(this);
 	    thisActivity = this;
 
 	    DB = new DatabaseHandler(this);
@@ -108,13 +110,8 @@ public class DownloadActivity extends Activity implements OnClickListener{
 		           	LIST = new String[Content.size()-1];
 		        	Address = new String[Content.size()-1];
 		        	for(int i=0;i<Content.size()-1;i++){
-		        		String LastDate = DB.getLastModifiedDate(Content.get(i+1));
-		        		Log.e("arink"," "+LastDate+"|"+ModifiedSince);
-		        		if(LastDate != null && LastDate.equals(ModifiedSince)){
-		        			LIST[i] = Translator.getTitle(AppPreference.getSVN()+"/"+Content.get(i+1))+" (updated)";
-		        		}else{
-		        			LIST[i] = Translator.getTitle(AppPreference.getSVN()+"/"+Content.get(i+1));
-		        		}
+		        		
+		           		LIST[i] = Translator.getTitle(AppPreference.getSVN()+"/"+Content.get(i+1));
 		        		Address[i] = ContentAddress.get(i+1);
 		        	}
 
@@ -149,12 +146,15 @@ public class DownloadActivity extends Activity implements OnClickListener{
 		        case   FileManager.MESSAGE_DOWNLOAD_STARTED :
 		        	FILE_SIZE = (int)msg.arg1;
 		        	ModifiedSince = (String) msg.obj;
+		        
 		        	Log.d("Download","Lastmodified ="+ModifiedSince);
+		        	SimpleDateFormat sdf = new SimpleDateFormat("MMM dd,yyyy HH:mm:ss");		        	 
+		        	Date resultdate = new Date(Long.parseLong(ModifiedSince));		        
 		        	if(isListLoaded == false){
-		        		progressDialog.setTitle("Fetching List"+"["+FILE_SIZE+"kb]");
+		        		progressDialog.setTitle("Fetching List"+"\n"+FILE_SIZE+"kb\nLastmodified "+sdf.format(resultdate));
 		        		progressDialog.setMessage("Downloading ["+ FILE_SIZE+"kb]");
 		        	}else{
-		    		    progressDialog.setTitle("Downloading \n"+toDownload+"["+FILE_SIZE+"kb]");
+		    		    progressDialog.setTitle("Downloading "+"\n"+FILE_SIZE+"kb\nLastmodified "+sdf.format(resultdate));
 		        		progressDialog.setMessage("Downloading ["+ FILE_SIZE+"kb]");
 		        	}
 
@@ -225,15 +225,16 @@ public class DownloadActivity extends Activity implements OnClickListener{
 	        	listView.setAdapter(adapter);
 	        	listView.setTextFilterEnabled(true);
 	    	    //Set current mode on click
-	        	listView.setOnItemClickListener(new OnItemClickListener() {
-	    			@Override
-	    			public void onItemClick(AdapterView<?> parent, View view, int position,long id) {
+	        	listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+	    	        @Override
+	    	        public boolean onItemLongClick(AdapterView<?> av, View view, int position, final long id) {
 	    				TextView v = (TextView) view;
 	    				Toast.makeText(getApplicationContext(), v.getText(),   Toast.LENGTH_SHORT).show();
 	    				toDownload = Address[position];
-	    			    _submitButton.setText("Download "+LIST[position]);
-								// start the download immediately
-								startDownload();
+						// start the download immediately
+	    			    startDownload();
+	    			    
+	    			    return true;
 	    			}
 	    	    });
 
@@ -244,13 +245,6 @@ public class DownloadActivity extends Activity implements OnClickListener{
 	    }
 	};
 
-
-	@Override
-	public void onClick(View v) {
-		if (v.equals(_submitButton)){
-		    startDownload();
-		}
-	}
 
 	private void startDownload() {
 		progressDialog = new ProgressDialog(thisActivity);

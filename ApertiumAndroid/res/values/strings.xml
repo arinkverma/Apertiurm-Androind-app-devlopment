@@ -24,6 +24,10 @@
     <string name="widgetConfigButton">*</string>
     <string name="widgetTitle">Desktop Widget</string>
     <string name="clear">Clear</string>
+    <string name="from">&lt;from&gt;</string>
+    <string name="to">&lt;to&gt;</string>
+    <string name="arrow">→</string>
+    <string name="translateHint">Translated text will appear here</string>
     
 
 </resources>
