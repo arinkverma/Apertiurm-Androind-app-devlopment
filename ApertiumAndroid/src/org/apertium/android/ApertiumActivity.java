@@ -6,6 +6,8 @@
 
 package org.apertium.android;
 
+import java.lang.Thread.UncaughtExceptionHandler;
+
 import org.apertium.Translator;
 import org.apertium.android.DB.DatabaseHandler;
 import org.apertium.android.filemanager.FileManager;
@@ -56,6 +58,8 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	//Rules Manager
 	private RulesHandler rulesHandler;
 	private TranslationMode translationMode;
+	
+	private Activity thisActivity = null;
 
 
 	//Clipboard
@@ -66,7 +70,11 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		thisActivity = this;
+		
 		appPreference = new AppPreference(this);
+		
+		CrashRecovery();
 		FileManager.setDIR();
 
 		Log.i(TAG,""+appPreference.isCacheEnabled()+appPreference.isClipBoardGetEnabled()+appPreference.isClipBoardPushEnabled()+appPreference.isDisplayMarkEnabled());
@@ -74,6 +82,8 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 		DB = new DatabaseHandler(this.getBaseContext());
 		rulesHandler = new RulesHandler(this.getBaseContext());
 		clipboardHandler = new ClipboardHandler(this);
+		
+		
 
 		Intent intent = getIntent();
 		Bundle extras = intent.getExtras();
@@ -98,6 +108,38 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	}
 
 
+	@SuppressWarnings("deprecation")
+	private void CrashRecovery(){
+		String crash = appPreference.GetCrashReport();
+		if(crash != null){
+			appPreference.ClearCrashReport();
+			Log.i(TAG,"Crash on last run time" + crash);
+			appPreference.setCacheEnabled(false);
+			appPreference.setDisplayMark(false);
+			 
+    	    final AlertDialog alertDialog = new AlertDialog.Builder(thisActivity).create();
+    	    alertDialog.setTitle("Crash Detected!");
+    	    alertDialog.setMessage("The application was crashed during last run with error "+crash+". Caching and other advance features has been disabled.");
+    	    alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+    	        public void onClick(final DialogInterface dialog, final int which) {    	   
+    	        	alertDialog.dismiss();    	   
+    	     } });
+    	    
+    	    alertDialog.setButton2("Setting", new DialogInterface.OnClickListener() {
+    	        public void onClick(final DialogInterface dialog, final int which) {
+    	   
+    	    		final Intent myIntent = new Intent(ApertiumActivity.this, ManageActivity.class);
+    				ApertiumActivity.this.startActivity(myIntent);
+    	   
+    	     } });
+    	    
+    	    alertDialog.show();
+		
+		}
+	}
+	
+	
+	
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -165,7 +207,8 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	/* Translation Thread,
 	 * Load translation rules and excute lttoolbox.jar */
 	private void TranslationRun(){
-
+		final Runtime rt = Runtime.getRuntime();
+		
 	    Thread t = new Thread() {
 	        @Override
 	        public void run() {
@@ -194,6 +237,24 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	        }
 	    };
 	    t.start();
+	    
+	    
+	    //Saving and setting crash happen flag
+	    
+	    Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+			@Override
+            public void uncaughtException(Thread t, Throwable e) {
+	    	    Translator.clearCache();
+	    	    String error = e.getMessage();
+	    	    Log.e("Error", error);
+	    	    appPreference.ReportCrash(error);
+	    	    progressDialog.dismiss();
+	    	    thisActivity.finish();
+	    	    android.os.Process.killProcess(android.os.Process.myPid());
+	    	    
+	         }
+        });
+	    
 	}
 
 

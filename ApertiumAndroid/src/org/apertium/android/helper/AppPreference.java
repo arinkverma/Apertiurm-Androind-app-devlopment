@@ -21,6 +21,7 @@ public class AppPreference   {
 	public static final String MarkPref = "MarkPref";
 	public static final String ClipBoardGetPref = "ClipGetPref";
 	public static final String ClipBoardPushPref = "ClipPushPref";
+	public static final String CrashPref = "CrashPref";
 	
 	private Context context = null;
 	
@@ -104,5 +105,20 @@ public class AppPreference   {
 	
 	public static String getSVN(){
 		return _SVNaddress;
+	}
+	
+	
+	public void ReportCrash(String y){
+		 editor.putString(CrashPref, y);
+		 editor.commit();
+	}
+	
+	public String GetCrashReport(){
+		return prefs.getString(CrashPref, null);
+	}
+	
+	public void ClearCrashReport(){
+		editor.putString(CrashPref, null);
+		editor.commit();
 	}
 }
