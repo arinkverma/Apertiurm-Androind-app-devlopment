@@ -6,21 +6,18 @@
 package org.apertium.android;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.apertium.Translator;
-import org.apertium.android.DB.DatabaseHandler;
 import org.apertium.android.filemanager.FileManager;
 import org.apertium.android.helper.AppPreference;
 
@@ -36,14 +33,13 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class DownloadActivity extends Activity {
+public class DownloadActivity extends Activity  implements OnClickListener{
 	public static final String TAG = "DownloadActivity";
 
 
@@ -61,26 +57,35 @@ public class DownloadActivity extends Activity {
     private String toDownload = null;
     private int FILE_SIZE = 0;
     private String ModifiedSince = null;
-    private DatabaseHandler DB = null;
 
+    private Button _reloadButton;
   
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
-	    setContentView(R.layout.svnlayout);
+	    setContentView(R.layout.svn_layout);
 	    listView  = (ListView) findViewById(R.id.listView1);
 	    thisActivity = this;
 
-	    DB = new DatabaseHandler(this);
+	    _reloadButton = (Button) findViewById(R.id.reloadButton);
+	    _reloadButton.setOnClickListener(this);
+	    
 	    progressDialog = new ProgressDialog(thisActivity);
 	    progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 	    progressDialog.setTitle("Downloading\nSVN List");
 	    progressDialog.setCancelable(false);
 	    progressDialog.show();
 
-	    FileManager.DownloadRun(AppPreference.getSVN(),AppPreference.TEMP_DIR(),thisActivity.handler);
-
+	    File svnCache = new File(AppPreference.TEMP_DIR()+"/svn.html");
+	    if(!svnCache.exists()){
+	    	FileManager.DownloadRun(AppPreference.getSVN(),AppPreference.TEMP_DIR()+"/svn.html",thisActivity.handler);
+	    	
+	    }else{
+	    	progressDialog.setMessage("Generating view");
+        	ParseHtmlRun();
+        	isListLoaded = true;
+	    }
 	}
 
 
@@ -93,14 +98,14 @@ public class DownloadActivity extends Activity {
 	        	List<String>  ContentAddress = new ArrayList<String>();
 	        	InputStream is;
 				try {
-					is = new FileInputStream(AppPreference.TEMP_DIR()+"/file.txt");
+					is = new FileInputStream(AppPreference.TEMP_DIR()+"/svn.html");
 					BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 		        	if (is!=null) {
 		        		while ((input = reader.readLine()) != null) {
 		        			String pattern 	= "<li><a href=\"|\">|</a></li>";
 		        			String[] updated = input.split(pattern);
 		        			if(updated.length>2){
-		        				Log.e(updated[1],updated[2] + "\n" );
+		        				Log.i(updated[1],updated[2] + "\n" );
 		        				Content.add(updated[2]);
 		        				ContentAddress.add(updated[1]);
 		        			}
@@ -252,6 +257,21 @@ public class DownloadActivity extends Activity {
 		progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 		progressDialog.setCancelable(false);
 		progressDialog.show();
-		FileManager.DownloadRun(AppPreference.getSVN()+toDownload,AppPreference.TEMP_DIR(),thisActivity.handler);
+		FileManager.DownloadRun(AppPreference.getSVN()+toDownload,AppPreference.TEMP_DIR()+"/"+toDownload,thisActivity.handler);
+	}
+
+
+	@Override
+	public void onClick(View v) {
+		if (v.equals(_reloadButton)){
+			progressDialog = new ProgressDialog(thisActivity);
+		    progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+		    progressDialog.setTitle("Downloading\nSVN List");
+		    progressDialog.setCancelable(false);
+		    progressDialog.show();
+			FileManager.DownloadRun(AppPreference.getSVN(),AppPreference.TEMP_DIR(),thisActivity.handler);
+		    
+		}
+		
 	}
 }

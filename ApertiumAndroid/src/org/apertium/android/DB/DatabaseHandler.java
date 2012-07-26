@@ -6,11 +6,14 @@
 package org.apertium.android.DB;
 
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apertium.android.languagepair.TranslationMode;
+import org.apertium.android.helper.AppPreference;
+import org.apertium.android.helper.ConfigManager;
 import org.apertium.android.languagepair.LanguagePackage;
+import org.apertium.android.languagepair.TranslationMode;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -287,6 +290,32 @@ public class DatabaseHandler {
     	SQLiteDatabase db = openHelper.getWritableDatabase();
     	db.delete(TABLE_PACKAGE, KEY_PACKAGE_ID + " = ?",new String[] { String.valueOf(PackageID) });
     	db.delete(TABLE_MODE, KEY_MODE_PACKAGE + " = ?",new String[] { String.valueOf(PackageID) });
+    	db.close();
+    }
+    
+    
+    //Updating DB entries
+    public void updateDB(){
+    	Log.i(TAG, "Update database");
+    	OpenHelper openHelper = new OpenHelper(this.context);
+    	SQLiteDatabase db = openHelper.getWritableDatabase();
+    	db.delete(TABLE_PACKAGE,null, null);
+    	db.delete(TABLE_MODE,null,null);     	
+    	File JARDIR = new File(AppPreference.JAR_DIR());
+    	File[] files = JARDIR.listFiles();
+    	for(int i=0;i<files.length;i++){
+    		Log.i(TAG,files[i].getAbsolutePath());
+    		ConfigManager config;
+			try {
+				config = new ConfigManager(files[i].getAbsolutePath(),files[i].getName());
+				config.setModifiedDate(files[i].lastModified()+"");
+				LanguagePackage pack = new LanguagePackage(config);
+				addLanuagepair(pack);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}	
+    	}
+    	
     	db.close();
     }
     

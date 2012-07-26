@@ -14,7 +14,7 @@
         android:layout_marginBottom="10dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        android:text="@string/discardButton"/>
+        android:text="@string/discard"/>
 
     <Button
         android:id="@+id/installButton"
@@ -24,7 +24,7 @@
         android:layout_alignLeft="@+id/discardButton"
         android:layout_alignRight="@+id/discardButton"
         android:layout_marginBottom="10dp"
-        android:text="@string/installButton" />
+        android:text="@string/install" />
 
     <ScrollView
         android:id="@+id/scrollView1"

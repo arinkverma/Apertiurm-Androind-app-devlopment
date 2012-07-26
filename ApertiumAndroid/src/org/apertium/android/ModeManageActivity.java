@@ -51,14 +51,10 @@ public class ModeManageActivity extends ListActivity {
 	private static String packagetoRemove;
 	private String PrefToSet = null;
 
-	private AppPreference appPreference = null;
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
-
-
-	    appPreference = new AppPreference(this);
 
 	    Intent intent = getIntent();
 		Bundle extras = intent.getExtras();

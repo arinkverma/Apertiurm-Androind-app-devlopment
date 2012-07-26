@@ -4,10 +4,12 @@
  */
 package org.apertium.android;
 
+import org.apertium.android.DB.DatabaseHandler;
 import org.apertium.android.filemanager.FileChooserActivity;
 import org.apertium.android.helper.AppPreference;
 import org.apertium.android.widget.WidgetConfigActivity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -21,13 +23,16 @@ public class ManageActivity extends PreferenceActivity {
 	
 	
 	AppPreference appPreference = null;
+	Activity thisActivity = null;
         @SuppressWarnings("deprecation")
 		@Override
         protected void onCreate(Bundle savedInstanceState) {
-        	appPreference = new AppPreference(this);
+        	
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.setting);
                 
+            appPreference = new AppPreference(this);
+        	thisActivity = this;
                 
             /*List Package*/
 			Preference listPref = (Preference) findPreference("listPref");
@@ -118,6 +123,18 @@ public class ManageActivity extends PreferenceActivity {
                     return true;
                 }
             });
+            
+            /*Update DB */
+            Preference UpdateDBPref = (Preference) findPreference("UpdateDBPref");
+            UpdateDBPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+        		public boolean onPreferenceClick(Preference preference) {
+        			DatabaseHandler DB = new DatabaseHandler(thisActivity);
+        			DB.updateDB();
+        			
+                    return true;
+                }
+            });
+            
         }
         
         @Override

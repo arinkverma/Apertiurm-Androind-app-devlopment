@@ -74,12 +74,19 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 		
 		appPreference = new AppPreference(this);
 		
+		
 		CrashRecovery();
 		FileManager.setDIR();
 
 		Log.i(TAG,""+appPreference.isCacheEnabled()+appPreference.isClipBoardGetEnabled()+appPreference.isClipBoardPushEnabled()+appPreference.isDisplayMarkEnabled());
 
 		DB = new DatabaseHandler(this.getBaseContext());
+		
+		if(appPreference.isStateChanged()){
+			DB.updateDB();
+			appPreference.SaveState();
+		}
+		
 		rulesHandler = new RulesHandler(this.getBaseContext());
 		clipboardHandler = new ClipboardHandler(this);
 		
@@ -108,18 +115,21 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	}
 
 
+	@Override
+	public void onDestroy(){
+		super.onDestroy();
+	}
+	
 	@SuppressWarnings("deprecation")
 	private void CrashRecovery(){
 		String crash = appPreference.GetCrashReport();
 		if(crash != null){
 			appPreference.ClearCrashReport();
 			Log.i(TAG,"Crash on last run time" + crash);
-			appPreference.setCacheEnabled(false);
-			appPreference.setDisplayMark(false);
 			 
     	    final AlertDialog alertDialog = new AlertDialog.Builder(thisActivity).create();
     	    alertDialog.setTitle("Crash Detected!");
-    	    alertDialog.setMessage("The application was crashed during last run with error "+crash+". Caching and other advance features has been disabled.");
+    	    alertDialog.setMessage("The application was crashed during last run with error "+crash+". Please tell us about it at arinkverma@gmail.com .");
     	    alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
     	        public void onClick(final DialogInterface dialog, final int which) {    	   
     	        	alertDialog.dismiss();    	   
@@ -184,15 +194,15 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	/* Init View,
 	 * Initialing view */
 	private void initView() {
-		Log.i(TAG,"ApertiumActivity.InitView Started");
-		setContentView(R.layout.main);
+		Log.i(TAG,"ApertiumActivityInitView Started");
+		setContentView(R.layout.main_layout);
 		_inputText 		= (EditText) findViewById(R.id.inputtext);
 		if(appPreference.isClipBoardGetEnabled()){
 			_inputText.setText(clipboardHandler.getText());
 		}
 
 		_submitButton	= (Button) findViewById(R.id.translateButton);
-		_outputText 	= (TextView) findViewById(R.id.outputtext);
+		_outputText 	= (TextView) findViewById(R.id.outputText);
 		_toButton 		= (Button) findViewById(R.id.toButton);
 		_fromButton		= (Button) findViewById(R.id.fromButton);
 		_dirButton 		= (Button) findViewById(R.id.modeSwitch);
@@ -207,7 +217,6 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	/* Translation Thread,
 	 * Load translation rules and excute lttoolbox.jar */
 	private void TranslationRun(){
-		final Runtime rt = Runtime.getRuntime();
 		
 	    Thread t = new Thread() {
 	        @Override
@@ -272,7 +281,6 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	        	try {
 					Translator.setBase(rulesHandler.getClassLoader());
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 	            break;

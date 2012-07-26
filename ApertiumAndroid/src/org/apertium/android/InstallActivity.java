@@ -159,7 +159,7 @@ public class InstallActivity extends Activity implements OnClickListener {
 		        @Override
 		        public void run() {
 		        	try {
-		        		File file = new File(AppPreference.BASE_DIR()+"/"+config.PackageID());
+		        		File file = new File(AppPreference.JAR_DIR()+"/"+config.PackageID());
 		        		FileManager.remove(file);
 		        		DB.deletePackage(pack.getID());
 		        	} catch (Exception e) {
@@ -188,7 +188,7 @@ public class InstallActivity extends Activity implements OnClickListener {
 	        @Override
 	        public void run() {
 	        	
-				FileManager.move(_path,AppPreference.BASE_DIR()+"/"+config.PackageID());
+				FileManager.move(_path,AppPreference.JAR_DIR()+"/"+config.PackageID());
 				
 	            Message msg = Message.obtain();
 	            msg.what = 1;

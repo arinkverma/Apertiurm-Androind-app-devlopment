@@ -54,12 +54,19 @@ public class FileManager {
 	
 	public static void setDIR(){
 	    File baseDir = new File(AppPreference.BASE_DIR());
-	    File tempDir = new File(AppPreference.TEMP_DIR());		    
+	    File tempDir = new File(AppPreference.TEMP_DIR());	
+	    File jarDir = new File(AppPreference.JAR_DIR());	
 	    if(!baseDir.exists()){
 	    	baseDir.mkdir();	
 	    	tempDir.mkdir();
-	    }else if(!tempDir.exists()){
-	    	tempDir.mkdir();	   
+	    	jarDir.mkdir();
+	    }else{
+		    if(!tempDir.exists()){
+		    	tempDir.mkdir();	   
+		    }
+		    if(!jarDir.exists()){
+		    	jarDir.mkdir();	   
+		    }
 	    }
 	}
 	
@@ -139,9 +146,8 @@ public class FileManager {
 	        public void run() {
 				URL url;
 				URLConnection conn;
-				int fileSize, lastSlash;
+				int fileSize;
 				String ModifiedSince = null;
-				String fileName;
 				BufferedInputStream inStream;
 				BufferedOutputStream outStream;
 				File outFile;
@@ -158,16 +164,7 @@ public class FileManager {
 	                        conn.setUseCaches(false);
 	                        fileSize = conn.getContentLength();
 	                        ModifiedSince = conn.getLastModified()+"";           
-	                        // get the filename
-	                        lastSlash = url.toString().lastIndexOf('/');
-	                        fileName = "file.txt";
-	                        if(lastSlash >=0) {
-	                                fileName = url.toString().substring(lastSlash + 1);
-	                        }
-	                        if(fileName.equals("")) {
-	                                fileName = "file.txt";
-	                        }
-	                        
+	                       	                        
 	                        // notify download start
 	                        int fileSizeInKB = fileSize / 1024;
 	                        msg = Message.obtain(handler, MESSAGE_DOWNLOAD_STARTED, fileSizeInKB , 0, ModifiedSince);
@@ -175,7 +172,7 @@ public class FileManager {
 	                        
 	                        // start download
 	                        inStream = new BufferedInputStream(conn.getInputStream());
-	                        outFile = new File(Target + "/" + fileName);
+	                        outFile = new File(Target);
 	                        fileStream = new FileOutputStream(outFile);
 	                        outStream = new BufferedOutputStream(fileStream, DOWNLOAD_BUFFER_SIZE);
 	                        byte[] data = new byte[DOWNLOAD_BUFFER_SIZE];
