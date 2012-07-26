@@ -264,13 +264,14 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 	@Override
 	public void onClick(View v) {
 		if (v.equals(_reloadButton)){
+			isListLoaded = false;
 			progressDialog = new ProgressDialog(thisActivity);
 		    progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 		    progressDialog.setTitle("Downloading\nSVN List");
 		    progressDialog.setCancelable(false);
 		    progressDialog.show();
-			FileManager.DownloadRun(AppPreference.getSVN(),AppPreference.TEMP_DIR(),thisActivity.handler);
-		    
+			FileManager.DownloadRun(AppPreference.getSVN(),AppPreference.TEMP_DIR()+"/svn.html",thisActivity.handler);
+		     
 		}
 		
 	}
