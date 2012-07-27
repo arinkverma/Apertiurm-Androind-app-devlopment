@@ -10,7 +10,7 @@
         android:layout_height="120dp"
         android:layout_weight="0.5"
         android:inputType="text|textMultiLine"
-        android:text="@string/inputtext" />
+        android:text="@string/input_text" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -21,7 +21,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1.2"
-            android:text="@string/translateButton" />
+            android:text="@string/translate" />
 
         <Button
             android:id="@+id/fromButton"
@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/from" />
-        
+
         <Button
             android:id="@+id/modeSwitch"
             android:layout_width="wrap_content"
