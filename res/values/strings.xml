@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Apertium!</string>
+    <string name="app_name">Apertium</string>
+    <string name="translate">Translate</string>
+    <string name="input_text">Apertium offers both text translation, along with the translation of documents and surf and translate.</string>
+    <string name="install_language">Add Language</string>
+    <string name="change_language">Change language pair</string>
+    <string name="option_menu">Menu</string>
+    <string name="share">Share</string>
+    <string name="copy">Copy to clipboard</string>
+    <string name="manage">Manage</string>
+    <string name="about">About</string>
+    <string name="install">Install</string>
+    <string name="discard">Discard</string>
+    <string name="NA">Not Available</string>
+    <string-array name="entries_list_preference">
+        <item >one</item>
+        <item >two</item>
+    </string-array>
+    <string name="widgetAddButton">+</string>
+    <string name="widgetConfigButton">*</string>
+    <string name="widgetTitle">Desktop Widget</string>
+    <string name="clear">Clear</string>
+    <string name="from">&lt;from&gt;</string>
+    <string name="to">&lt;to&gt;</string>
+    <string name="arrow">→</string>
+    <string name="translateHint">Translated text will appear here</string>
+    <string name="reload">Reload</string>
+    
+
+</resources>
