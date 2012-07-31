@@ -13,7 +13,7 @@ import org.apertium.android.DB.DatabaseHandler;
 import org.apertium.android.filemanager.FileChooserActivity;
 import org.apertium.android.filemanager.FileManager;
 import org.apertium.android.helper.AppPreference;
-import org.apertium.android.helper.RulesHandler;
+import org.apertium.android.languagepair.RulesHandler;
 import org.apertium.android.languagepair.TranslationMode;
 
 import android.app.AlertDialog;
@@ -157,7 +157,7 @@ public class ModeManageActivity extends ListActivity {
 	        @Override
 	        public void run() {
 	        	try {
-	        		File file = new File(AppPreference.BASE_DIR()+"/"+packagetoRemove);
+	        		File file = new File(AppPreference.BASE_DIR+"/"+packagetoRemove);
 	        		FileManager.remove(file);
 	        	} catch (Exception e) {
 					e.printStackTrace();

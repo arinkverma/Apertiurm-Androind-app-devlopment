@@ -1,6 +1,7 @@
 /**
- *
- * @author Arink Verma
+ * DownloadActivity.java
+ * Download package List from SVN as well as package
+ *  @author Arink Verma
  */
 
 package org.apertium.android;
@@ -42,8 +43,6 @@ import android.widget.Toast;
 public class DownloadActivity extends Activity  implements OnClickListener{
 	public static final String TAG = "DownloadActivity";
 
-
-
     ProgressDialog progressDialog;
     private DownloadActivity thisActivity;
 
@@ -77,9 +76,9 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 	    progressDialog.setCancelable(false);
 	    progressDialog.show();
 
-	    File svnCache = new File(AppPreference.TEMP_DIR()+"/svn.html");
+	    File svnCache = new File(AppPreference.TEMP_DIR+"/svn.html");
 	    if(!svnCache.exists()){
-	    	FileManager.DownloadRun(AppPreference.getSVN(),AppPreference.TEMP_DIR()+"/svn.html",thisActivity.handler);
+	    	FileManager.DownloadRun(AppPreference.SVN_ADDRESS,AppPreference.TEMP_DIR+"/svn.html",thisActivity.handler);
 	    	
 	    }else{
 	    	progressDialog.setMessage("Generating view");
@@ -98,7 +97,7 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 	        	List<String>  ContentAddress = new ArrayList<String>();
 	        	InputStream is;
 				try {
-					is = new FileInputStream(AppPreference.TEMP_DIR()+"/svn.html");
+					is = new FileInputStream(AppPreference.TEMP_DIR+"/svn.html");
 					BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 		        	if (is!=null) {
 		        		while ((input = reader.readLine()) != null) {
@@ -116,7 +115,7 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 		        	Address = new String[Content.size()-1];
 		        	for(int i=0;i<Content.size()-1;i++){
 		        		
-		           		LIST[i] = Translator.getTitle(AppPreference.getSVN()+"/"+Content.get(i+1));
+		           		LIST[i] = Translator.getTitle(AppPreference.SVN_ADDRESS+"/"+Content.get(i+1));
 		        		Address[i] = ContentAddress.get(i+1);
 		        	}
 
@@ -215,7 +214,7 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 	        	}else{
 		        	progressDialog.dismiss();
 		        	Intent myIntent = new Intent(thisActivity, InstallActivity.class);
-			    	myIntent.putExtra("filepath", AppPreference.TEMP_DIR()+"/"+toDownload);
+			    	myIntent.putExtra("filepath", AppPreference.TEMP_DIR+"/"+toDownload);
 			    	myIntent.putExtra("filename", toDownload);
 			    	myIntent.putExtra("filedate",ModifiedSince);
 			    	startActivity(myIntent);
@@ -257,7 +256,7 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 		progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 		progressDialog.setCancelable(false);
 		progressDialog.show();
-		FileManager.DownloadRun(AppPreference.getSVN()+toDownload,AppPreference.TEMP_DIR()+"/"+toDownload,thisActivity.handler);
+		FileManager.DownloadRun(AppPreference.SVN_ADDRESS+toDownload,AppPreference.TEMP_DIR+"/"+toDownload,thisActivity.handler);
 	}
 
 
@@ -270,7 +269,7 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 		    progressDialog.setTitle("Downloading\nSVN List");
 		    progressDialog.setCancelable(false);
 		    progressDialog.show();
-			FileManager.DownloadRun(AppPreference.getSVN(),AppPreference.TEMP_DIR()+"/svn.html",thisActivity.handler);
+			FileManager.DownloadRun(AppPreference.SVN_ADDRESS,AppPreference.TEMP_DIR+"/svn.html",thisActivity.handler);
 		     
 		}
 		

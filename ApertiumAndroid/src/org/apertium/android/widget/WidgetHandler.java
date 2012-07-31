@@ -17,7 +17,7 @@ public class WidgetHandler {
 	
 	public WidgetHandler(Context ctx,int widgetID){
 		this.CTX = ctx;
-		this.settings = CTX.getSharedPreferences(AppPreference.SharedPreference()+".Widget", 0);
+		this.settings = CTX.getSharedPreferences(AppPreference.SVN_ADDRESS+".Widget", 0);
 		this.editor = settings.edit();
 	}
 	

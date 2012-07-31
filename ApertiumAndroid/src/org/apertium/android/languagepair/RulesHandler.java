@@ -4,13 +4,13 @@
  */
 
 
-package org.apertium.android.helper;
+package org.apertium.android.languagepair;
 
 import java.io.File;
 import java.security.SecureClassLoader;
 
 import org.apertium.android.DB.DatabaseHandler;
-import org.apertium.android.languagepair.TranslationMode;
+import org.apertium.android.helper.AppPreference;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -29,7 +29,7 @@ public class RulesHandler extends SecureClassLoader{
 	public RulesHandler(Context ctx){
 		this.CTX = ctx;
 		this._tmpDIR = ctx.getDir("dex", 0);
-		this.settings = CTX.getSharedPreferences(AppPreference.SharedPreference(), 0);
+		this.settings = CTX.getSharedPreferences(AppPreference.PREFERENCE_NAME, 0);
 		this.editor = settings.edit();
 	}
 
@@ -76,11 +76,11 @@ public class RulesHandler extends SecureClassLoader{
 	}
 
 	public String PathCurrentPackage(){
-		return AppPreference.PackagePath(getCurrentPackage());
+		return AppPreference.JAR_DIR+"/"+getCurrentPackage();
 	}
 	
 	public String ExtractPathCurrentPackage(){
-		return AppPreference.PackagePath(getCurrentPackage())+"/extract";
+		return PathCurrentPackage()+"/extract";
 	}
 
 	public DexClassLoader getClassLoader(){

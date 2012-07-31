@@ -63,9 +63,7 @@ public class ManageActivity extends PreferenceActivity {
                     return true;
                 }
             });
-			
-            
-            ;	
+				
       
             /*Cache Enable */
             Preference CachePref = (Preference) findPreference(AppPreference.CachePref);
@@ -137,9 +135,4 @@ public class ManageActivity extends PreferenceActivity {
             
         }
         
-        @Override
-        protected void onStart(){
-        	super.onStart();     	
-        }        
-
 }

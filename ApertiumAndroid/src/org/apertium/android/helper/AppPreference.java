@@ -18,28 +18,16 @@ import android.util.Log;
 public class AppPreference   {
 	private static final String TAG = "AppPreference";
 	
-	//App properties
-	private static final String version = "2.0.1";
-	private static final String _RulePackage = "org.apertium.android.rule";
-
 	//Directories path
-	private static final String base_dir = Environment.getExternalStorageDirectory().toString() +"/apertium";
-	private static final String jar_dir = Environment.getExternalStorageDirectory().toString() +"/apertium/jars";
-	private static final String temp_dir  = Environment.getExternalStorageDirectory().toString() +"/apertium/temp";
+	public static final String BASE_DIR = Environment.getExternalStorageDirectory().toString() +"/apertium";
+	public static final String JAR_DIR = Environment.getExternalStorageDirectory().toString() +"/apertium/jars";
+	public static final String TEMP_DIR  = Environment.getExternalStorageDirectory().toString() +"/apertium/temp";
+	public static final String SVN_ADDRESS = "https://apertium.svn.sourceforge.net/svnroot/apertium/branches/gsoc2012/arink/Mikeljar/";
 
 	//Preferences name
-	private static final String PREFS_NAME = "ore.apertium.Pref";
-	public static final String CachePref = "CachePref";
-	public static final String MarkPref = "MarkPref";
-	public static final String ClipBoardGetPref = "ClipGetPref";
-	public static final String ClipBoardPushPref = "ClipPushPref";
-	public static final String CrashPref = "CrashPref";
-	
+	public static final String PREFERENCE_NAME = "ore.apertium.Pref";
 	
 	private Context context = null;
-	
-	private static String _SVNaddress = "https://apertium.svn.sourceforge.net/svnroot/apertium/branches/gsoc2012/arink/Mikeljar/";
-	
 	private SharedPreferences prefs = null;
 	private SharedPreferences.Editor editor;
 	
@@ -49,37 +37,8 @@ public class AppPreference   {
 		this.editor = prefs.edit();
 	}
 	
-	public static String BASE_DIR(){
-		return base_dir;
-	}
-	
-	public static String JAR_DIR(){
-		return jar_dir;
-	}
-	
-	public static String TEMP_DIR(){
-		return temp_dir;
-	}
-	
-	public String VERSION(){
-		return version;
-	}
-	
-	public static String SharedPreference(){
-		return PREFS_NAME;
-	}
-	
-	public static String RulePackage(){
-		return _RulePackage;
-	}
-	
-	public static  String PackagePath(String PackageID){
-		if(PackageID==null){
-			return null;
-		}
-		return jar_dir+"/"+PackageID;
-	}
-	
+/*Cache Preference*/
+	public static final String CachePref = "CachePref";
 	
 	public void setCacheEnabled(boolean y){
 		 editor.putBoolean(CachePref, y);
@@ -91,7 +50,8 @@ public class AppPreference   {
 	}
 	
 
-	
+/*DisplayMark Preference*/	
+	public static final String MarkPref = "MarkPref";
 	
 	public void setDisplayMark(boolean y){
 		 editor.putBoolean(MarkPref, y);
@@ -101,6 +61,11 @@ public class AppPreference   {
 	public boolean isDisplayMarkEnabled(){
 		return prefs.getBoolean(MarkPref, false);
 	}
+	
+	
+/*ClipBoardPush Preference*/	
+	public static final String ClipBoardGetPref = "ClipGetPref";
+	public static final String ClipBoardPushPref = "ClipPushPref";
 	
 	public void setClipBoardPush(boolean y){
 		 editor.putBoolean(ClipBoardPushPref, y);
@@ -120,11 +85,9 @@ public class AppPreference   {
 		return prefs.getBoolean(ClipBoardGetPref, false);
 	}
 	
-	
-	public static String getSVN(){
-		return _SVNaddress;
-	}
-	
+
+/*Crash Preference*/	
+	public static final String CrashPref = "CrashPref";
 	
 	public void ReportCrash(String y){
 		 editor.putString(CrashPref, y);
@@ -143,8 +106,8 @@ public class AppPreference   {
 	
 	
 	//Last state
-	public static final String LocalePref = "LocalePref";
-	public static final String LastJARDirChangedPref = "LastJARDirChangedPref";
+	private static final String LocalePref = "LocalePref";
+	private static final String LastJARDirChangedPref = "LastJARDirChangedPref";
 	
 	
 	public boolean isStateChanged(){
@@ -156,7 +119,7 @@ public class AppPreference   {
 			return true;
 		}
 		
-		File f = new File(jar_dir);
+		File f = new File(JAR_DIR);
 		
 		String LastModified = f.lastModified()+"";
 		String SavedLastModified = prefs.getString(LastJARDirChangedPref,"");
@@ -173,7 +136,7 @@ public class AppPreference   {
 	public void SaveState(){
 		editor.putString(LocalePref, Locale.getDefault().getDisplayLanguage());
 		
-		File f = new File(jar_dir);
+		File f = new File(JAR_DIR);
 		editor.putString(LastJARDirChangedPref,f.lastModified()+"");
 		
 		Log.i(TAG,"lastLocale = "+Locale.getDefault().getDisplayLanguage()+", LastJARDirChanged = "+f.lastModified());

@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apertium.android.helper.AppPreference;
-import org.apertium.android.helper.ConfigManager;
 import org.apertium.android.languagepair.LanguagePackage;
 import org.apertium.android.languagepair.TranslationMode;
 
@@ -66,18 +65,18 @@ public class DatabaseHandler {
     	ContentValues values = new ContentValues();
     	
     	//Inserting package details
-    	values.put(KEY_PACKAGE_ID,L.getID()); 
+    	values.put(KEY_PACKAGE_ID,L.PackageID()); 
     	values.put(KEY_PACKAGE_LASTMODIFIED,L.getLastDate());     	
     	db.insert(TABLE_PACKAGE, null, values);
     	values.clear();
     	
     	//Inserting Modes from above package
-    	List<TranslationMode> TranslationModes = L.getModes();
+    	List<TranslationMode> TranslationModes = L.getAvailableModes();
         for (int i=0;i<TranslationModes.size();i++) {
         	TranslationMode m = TranslationModes.get(i);
         	values.put(KEY_MODE_ID , m.getID());
         	values.put(KEY_MODE_TITLE, m.getTitle()); 
-        	values.put(KEY_MODE_PACKAGE, L.getID());
+        	values.put(KEY_MODE_PACKAGE, L.PackageID());
         	db.insert(TABLE_MODE, null, values);
         }	
     	db.close();
@@ -301,16 +300,14 @@ public class DatabaseHandler {
     	SQLiteDatabase db = openHelper.getWritableDatabase();
     	db.delete(TABLE_PACKAGE,null, null);
     	db.delete(TABLE_MODE,null,null);     	
-    	File JARDIR = new File(AppPreference.JAR_DIR());
+    	File JARDIR = new File(AppPreference.JAR_DIR);
     	File[] files = JARDIR.listFiles();
     	for(int i=0;i<files.length;i++){
     		Log.i(TAG,files[i].getAbsolutePath()+"/"+files[i].getName()+".jar");
-    		ConfigManager config;
 			try {
-				config = new ConfigManager(files[i].getAbsolutePath()+"/"+files[i].getName()+".jar",files[i].getName());
-				config.setModifiedDate(files[i].lastModified()+"");
-				LanguagePackage pack = new LanguagePackage(config);
-				addLanuagepair(pack);
+				LanguagePackage languagePackage = new LanguagePackage(files[i].getAbsolutePath()+"/"+files[i].getName()+".jar",files[i].getName());
+				languagePackage.setModifiedDate(files[i].lastModified()+"");
+				addLanuagepair(languagePackage);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}	

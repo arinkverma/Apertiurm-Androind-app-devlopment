@@ -12,7 +12,6 @@ import java.util.List;
 import org.apertium.android.DB.DatabaseHandler;
 import org.apertium.android.filemanager.FileManager;
 import org.apertium.android.helper.AppPreference;
-import org.apertium.android.helper.ConfigManager;
 import org.apertium.android.languagepair.LanguagePackage;
 import org.apertium.android.languagepair.TranslationMode;
 
@@ -38,7 +37,6 @@ public class InstallActivity extends Activity implements OnClickListener {
 	//Text view
 	private TextView Heading1,Info1,Heading2,Info2;
 	private DatabaseHandler DB;	
-	private LanguagePackage pack;
 	private List<TranslationMode> translationModes;
 	private String _path = null;
 	private String _packageID =  null;
@@ -52,7 +50,7 @@ public class InstallActivity extends Activity implements OnClickListener {
 	private static ProgressDialog progressDialog;
 	
 	//To pharse and manage Config.json
-	private ConfigManager config;
+	private LanguagePackage languagePackage;
 	
 	
 	/** Called when the activity is first created. */
@@ -67,19 +65,18 @@ public class InstallActivity extends Activity implements OnClickListener {
 		try {
 			
 			
-			config = new ConfigManager(this._path,this._packageID);
-			config.setModifiedDate(this._lastModified);
-			pack = new LanguagePackage(config);
+			languagePackage = new LanguagePackage(this._path,this._packageID);
+			languagePackage.setModifiedDate(this._lastModified);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		Info1.append("\nName: "+config.PackageTitle()+"\n");
+		Info1.append("\nName: "+languagePackage.PackageTitle()+"\n");
 		//At present no version number is supported 
 		//Info1.append("Ver: "+config.Version()+"\n");
 	
 		
 		/* Checking the version of package, hence perform action accordingly */
-		String LastDate = DB.getLastModifiedDate(config.PackageID());
+		String LastDate = DB.getLastModifiedDate(languagePackage.PackageID());
 		
 		if(LastDate!=null){
 			if(LastDate.equals(this._lastModified)){	
@@ -93,7 +90,7 @@ public class InstallActivity extends Activity implements OnClickListener {
 		
 		
 		/* Finding the mode present in the package */		
-		this.translationModes = config.getAvailableModes();			
+		this.translationModes = languagePackage.getAvailableModes();			
 		
 		
 		Heading2.setText("Modes found!");
@@ -164,9 +161,9 @@ public class InstallActivity extends Activity implements OnClickListener {
 		        @Override
 		        public void run() {
 		        	try {
-		        		File file = new File(AppPreference.JAR_DIR()+"/"+config.PackageID());
+		        		File file = new File(AppPreference.JAR_DIR+"/"+languagePackage.PackageID());
 		        		FileManager.remove(file);
-		        		DB.deletePackage(pack.getID());
+		        		DB.deletePackage(languagePackage.PackageID());
 		        	} catch (Exception e) {
 						Heading1.setText("Error!");
 						Info1.setText("Cannot remove old package");
@@ -192,9 +189,10 @@ public class InstallActivity extends Activity implements OnClickListener {
 	        public void run() {
 	        	
 				try {
-					FileManager.unzip(_path,AppPreference.TEMP_DIR()+"/"+_packageID);
+					FileManager.unzip(_path,AppPreference.TEMP_DIR+"/"+_packageID);
 				} catch (IOException e) {
 					Log.e(TAG,e+"");
+					e.printStackTrace();
 				}
 				
 	            Message msg = Message.obtain();
@@ -213,12 +211,13 @@ public class InstallActivity extends Activity implements OnClickListener {
 	        public void run() {
 	        	
 	    	   
-				FileManager.move(AppPreference.TEMP_DIR()+"/"+config.PackageID(),AppPreference.JAR_DIR()+"/"+config.PackageID()+"/extract");
+				FileManager.move(AppPreference.TEMP_DIR+"/"+languagePackage.PackageID(),AppPreference.JAR_DIR+"/"+languagePackage.PackageID()+"/extract");
 				
 				try {
-					FileManager.copyFile(_path,AppPreference.JAR_DIR()+"/"+config.PackageID()+"/"+config.PackageID()+".jar");
+					FileManager.copyFile(_path,AppPreference.JAR_DIR+"/"+languagePackage.PackageID()+"/"+languagePackage.PackageID()+".jar");
 				} catch (IOException e) {
 					Log.e(TAG,e+"");
+					e.printStackTrace();
 				}
 				
 	            Message msg = Message.obtain();
@@ -236,7 +235,7 @@ public class InstallActivity extends Activity implements OnClickListener {
 	    Thread t = new Thread() {
 	        @Override
 	        public void run() {
-	        	DB.addLanuagepair(pack);
+	        	DB.addLanuagepair(languagePackage);
 	            Message msg = Message.obtain();
 	            msg.what = 3;
 	            handler.sendMessage(msg);

@@ -96,9 +96,9 @@ public class FileManager {
 	
 	
 	public static void setDIR(){
-	    File baseDir = new File(AppPreference.BASE_DIR());
-	    File tempDir = new File(AppPreference.TEMP_DIR());	
-	    File jarDir = new File(AppPreference.JAR_DIR());	
+	    File baseDir = new File(AppPreference.BASE_DIR);
+	    File tempDir = new File(AppPreference.TEMP_DIR);	
+	    File jarDir = new File(AppPreference.JAR_DIR);	
 	    
 	    if(!baseDir.exists()){
 	    	baseDir.mkdirs();	
