@@ -304,10 +304,10 @@ public class DatabaseHandler {
     	File JARDIR = new File(AppPreference.JAR_DIR());
     	File[] files = JARDIR.listFiles();
     	for(int i=0;i<files.length;i++){
-    		Log.i(TAG,files[i].getAbsolutePath());
+    		Log.i(TAG,files[i].getAbsolutePath()+"/"+files[i].getName()+".jar");
     		ConfigManager config;
 			try {
-				config = new ConfigManager(files[i].getAbsolutePath(),files[i].getName());
+				config = new ConfigManager(files[i].getAbsolutePath()+"/"+files[i].getName()+".jar",files[i].getName());
 				config.setModifiedDate(files[i].lastModified()+"");
 				LanguagePackage pack = new LanguagePackage(config);
 				addLanuagepair(pack);

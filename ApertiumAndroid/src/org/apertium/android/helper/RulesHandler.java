@@ -62,7 +62,7 @@ public class RulesHandler extends SecureClassLoader{
 	public String getCurrentPackage(){
 		String mode = settings.getString(_CurrentMode, "??-??" );
 		if(mode.equals("??-??")){
-			return "??-??";
+			return null;
 		}
 		DatabaseHandler DB = new DatabaseHandler(this.CTX);
 		TranslationMode m = DB.getMode(mode);
@@ -78,10 +78,14 @@ public class RulesHandler extends SecureClassLoader{
 	public String PathCurrentPackage(){
 		return AppPreference.PackagePath(getCurrentPackage());
 	}
+	
+	public String ExtractPathCurrentPackage(){
+		return AppPreference.PackagePath(getCurrentPackage())+"/extract";
+	}
 
 	public DexClassLoader getClassLoader(){
-		Log.d(TAG,"PathCurrentPackage ="+PathCurrentPackage()+", ODEX path="+this._tmpDIR.getAbsolutePath());
-		return new DexClassLoader(PathCurrentPackage(),this._tmpDIR.getAbsolutePath(), null, this.getClass().getClassLoader());
+		Log.d(TAG,"PathCurrentPackage ="+PathCurrentPackage()+"/"+getCurrentPackage()+".jar, ODEX path="+this._tmpDIR.getAbsolutePath());
+		return new DexClassLoader(PathCurrentPackage()+"/"+getCurrentPackage()+".jar",this._tmpDIR.getAbsolutePath(), null, this.getClass().getClassLoader());
 	}
 
 }

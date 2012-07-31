@@ -60,6 +60,7 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	private TranslationMode translationMode;
 	
 	private Activity thisActivity = null;
+	
 
 
 	//Clipboard
@@ -106,7 +107,7 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 		try {
 			Translator.setBase(rulesHandler.getClassLoader());
 		} catch (Exception e) {
-			Log.e(TAG, "Error while loading class");
+			Log.e(TAG, "Error while loading class"+e);
 		}
 
 		initView();
@@ -129,7 +130,7 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 			 
     	    final AlertDialog alertDialog = new AlertDialog.Builder(thisActivity).create();
     	    alertDialog.setTitle("Crash Detected!");
-    	    alertDialog.setMessage("The application was crashed during last run with error "+crash+". Please tell us about it at arinkverma@gmail.com .");
+    	    alertDialog.setMessage("The application was crashed during last run with error ["+crash+"].\n\n Please tell us about it at arinkverma@gmail.com .");
     	    alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
     	        public void onClick(final DialogInterface dialog, final int which) {    	   
     	        	alertDialog.dismiss();    	   
@@ -153,6 +154,8 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	@Override
 	protected void onResume() {
 		super.onResume();
+		
+		Log.i(TAG,"onResume mode=" + rulesHandler.getCurrentMode());
 		rulesHandler = new RulesHandler(this);
 		Intent intent = getIntent();
 		Bundle extras = intent.getExtras();
@@ -165,7 +168,6 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 
 		MODE = rulesHandler.getCurrentMode();
 		UpdateMode();
-		Log.i(TAG,"onResume mode=" + rulesHandler.getCurrentMode());
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -254,7 +256,7 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 			@Override
             public void uncaughtException(Thread t, Throwable e) {
 	    	    Translator.clearCache();
-	    	    String error = e.getMessage();
+	    	    String error = "["+e+"]";
 	    	    Log.e("Error", error);
 	    	    appPreference.ReportCrash(error);
 	    	    progressDialog.dismiss();
@@ -418,8 +420,15 @@ public class ApertiumActivity extends Activity implements OnClickListener{
     			if(appPreference.isCacheEnabled()){
     				Translator.clearCache();
     			}
-    			Translator.setBase(rulesHandler.getClassLoader());
+        		Log.i(TAG,"BASE ="+rulesHandler.getClassLoader()+"path = "+rulesHandler.ExtractPathCurrentPackage());
+    			
+        		Translator.setBase(rulesHandler.ExtractPathCurrentPackage(), rulesHandler.getClassLoader());
+        		  
+        		Translator.setDelayedNodeLoadingEnabled(true);
+        		Translator.setMemmappingEnabled(true);
+        		Translator.setPipingEnabled(false);
     		}
+    		
 
     		
 			Translator.setMode(MODE);

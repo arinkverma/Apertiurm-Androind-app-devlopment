@@ -21,16 +21,16 @@ public class ConfigManager {
 	private List<TranslationMode> modes;
 	
 	public ConfigManager(String path,String packID) throws Exception {
-			this.package_Title = Translator.getTitle(path);
-			Translator.setBase(path);
-			this.modesID = Translator.getAvailableModes();
-			modes = new ArrayList<TranslationMode>();
-			for(int i=0;i<this.modesID.length;i++){
-				TranslationMode M = new TranslationMode(this.modesID[i], Translator.getTitle(this.modesID[i]));
-				modes.add(M);
-			}
-			
-			this.package_id =  packID;
+		this.package_Title = Translator.getTitle(path);
+		Translator.setBase(path);
+		this.modesID = Translator.getAvailableModes();
+		modes = new ArrayList<TranslationMode>();
+		for(int i=0;i<this.modesID.length;i++){
+			TranslationMode M = new TranslationMode(this.modesID[i], Translator.getTitle(this.modesID[i]));
+			modes.add(M);
+		}
+		
+		this.package_id =  packID;
 	}
 	
 	public List<TranslationMode> getAvailableModes(){

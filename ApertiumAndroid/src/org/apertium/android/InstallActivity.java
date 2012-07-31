@@ -6,6 +6,7 @@
 package org.apertium.android;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import org.apertium.android.DB.DatabaseHandler;
@@ -39,9 +40,10 @@ public class InstallActivity extends Activity implements OnClickListener {
 	private DatabaseHandler DB;	
 	private LanguagePackage pack;
 	private List<TranslationMode> translationModes;
-	private String _path = "-1";
-	private String _packageID = "-1";
-	private String _lastModified ="-1";
+	private String _path = null;
+	private String _packageID =  null;
+	private String _lastModified = null;
+	private String FileName = null;
 	
 	//Action to be perform
 	private enum Action  {install,update,discard};
@@ -63,6 +65,8 @@ public class InstallActivity extends Activity implements OnClickListener {
 		todo = Action.install;
 		
 		try {
+			
+			
 			config = new ConfigManager(this._path,this._packageID);
 			config.setModifiedDate(this._lastModified);
 			pack = new LanguagePackage(config);
@@ -108,7 +112,8 @@ public class InstallActivity extends Activity implements OnClickListener {
 		Log.i(TAG,"InitView Started");
 	    Bundle extras = getIntent().getExtras();
 	    this._path = extras.getString("filepath");
-	    this._packageID = extras.getString("filename");
+	    this.FileName = extras.getString("filename");    		
+	    this._packageID =  this.FileName.substring(0, this.FileName.length() - 4);
 	    this._lastModified = extras.getString("filedate");
 	    
 		DB = new DatabaseHandler(this.getBaseContext());
@@ -176,19 +181,21 @@ public class InstallActivity extends Activity implements OnClickListener {
 		}	
 	
 	
-	
-	
 //Step 1
-//Installing..", "Copying files
+//Unziping file in temp dir
 	private void run1(){	
 		if(todo == Action.install){
-			progressDialog = ProgressDialog.show(this, "Installing..", "Copying files", true,false);
+			progressDialog = ProgressDialog.show(this, "Installing..", "Unziping files", true,false);
 		}
 	    Thread t = new Thread() {
 	        @Override
 	        public void run() {
 	        	
-				FileManager.move(_path,AppPreference.JAR_DIR()+"/"+config.PackageID());
+				try {
+					FileManager.unzip(_path,AppPreference.TEMP_DIR()+"/"+_packageID);
+				} catch (IOException e) {
+					Log.e(TAG,e+"");
+				}
 				
 	            Message msg = Message.obtain();
 	            msg.what = 1;
@@ -199,15 +206,39 @@ public class InstallActivity extends Activity implements OnClickListener {
 	}
 	
 //Step 2
-//Writing database
+//Installing..", "Copying files
 	private void run2(){	
+	    Thread t = new Thread() {
+	        @Override
+	        public void run() {
+	        	
+	    	   
+				FileManager.move(AppPreference.TEMP_DIR()+"/"+config.PackageID(),AppPreference.JAR_DIR()+"/"+config.PackageID()+"/extract");
+				
+				try {
+					FileManager.copyFile(_path,AppPreference.JAR_DIR()+"/"+config.PackageID()+"/"+config.PackageID()+".jar");
+				} catch (IOException e) {
+					Log.e(TAG,e+"");
+				}
+				
+	            Message msg = Message.obtain();
+	            msg.what = 2;
+	            handler.sendMessage(msg);
+	        }
+	    };
+	    t.start();
+	}
+	
+//Step 3
+//Writing database
+	private void run3(){	
 		//progressDialog.setMessage("Writing database");
 	    Thread t = new Thread() {
 	        @Override
 	        public void run() {
 	        	DB.addLanuagepair(pack);
 	            Message msg = Message.obtain();
-	            msg.what = 2;
+	            msg.what = 3;
 	            handler.sendMessage(msg);
 	        }
 	    };
@@ -220,19 +251,24 @@ public class InstallActivity extends Activity implements OnClickListener {
 	    public void handleMessage(Message msg) {
 	        switch(msg.what){
 	        case 0:
-	        	progressDialog.setMessage("Copying new files");
+	        	progressDialog.setMessage("Unziping files");
 	        	run1();
 	            break;
 	        case 1:
-	        	progressDialog.setMessage("Writing database");
+	        	progressDialog.setMessage("Copying new files");
 	        	run2();
-	            break;
+	            break;	        	
 	        case 2:
+	        	progressDialog.setMessage("Writing database");
+	        	run3();
+	            break;
+	        case 3:
 	        	progressDialog.dismiss();	
 	        	Intent myIntent1 = new Intent(InstallActivity.this,ModeManageActivity.class);
 	        	InstallActivity.this.startActivity(myIntent1);
 	        	finish();
 	            break;
+	        
 	        case -1:
 	        	progressDialog.dismiss();
 	        	Info1.setText("Error occur while installion");

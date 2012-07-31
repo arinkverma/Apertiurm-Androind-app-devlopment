@@ -222,8 +222,16 @@ public class ModeManageActivity extends ListActivity {
 
     			rulesHandler.setCurrentMode(MODE);
 	    		if(!PackageTOLoad.equals(currentPackage)){
-					Translator.setBase(rulesHandler.getClassLoader());
+	    			Log.i(TAG,"BASE ="+rulesHandler.getClassLoader()+"path = "+rulesHandler.ExtractPathCurrentPackage());
+	        		
+	    			Translator.setBase(rulesHandler.ExtractPathCurrentPackage(), rulesHandler.getClassLoader());
+	  
+	          		Translator.setDelayedNodeLoadingEnabled(true);
+	        		Translator.setMemmappingEnabled(true);
+	        		Translator.setPipingEnabled(false);
 	    		}
+    			
+        		
 				Translator.setMode(MODE);
 				Log.e("CurrentMode",rulesHandler.getCurrentMode());
 			} catch (Exception e) {

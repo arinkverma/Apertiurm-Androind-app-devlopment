@@ -16,11 +16,15 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Enumeration;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 
 import org.apertium.android.helper.AppPreference;
 
+import android.content.Context;
+import android.content.res.AssetManager;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -29,7 +33,46 @@ public class FileManager {
 	
 	static String TAG = "FileManager";
 	
-	public static void copyFile(InputStream in, OutputStream out) throws IOException {
+	
+	public static void  CopyAssets(String target,Context ctx) {
+	    AssetManager assetManager = ctx.getAssets();
+	    String[] files = null;
+	    try {
+	        files = assetManager.list("");
+	    } catch (IOException e) {
+	        Log.e("tag", e.getMessage());
+	    }
+	    for(String filename : files) {
+	        InputStream in = null;
+	        OutputStream out = null;
+	        try {
+	          in = assetManager.open(filename);
+	          out = new FileOutputStream(target);
+	          copyFile(in, out);
+	          in.close();
+	          in = null;
+	          out.flush();
+	          out.close();
+	          out = null;
+	        } catch(Exception e) {
+	            Log.e("tag", e.getMessage());
+	        }       
+	    }
+	}
+	
+
+	private static void copyFile(InputStream in, OutputStream out) throws IOException {
+	    byte[] buffer = new byte[1024];
+	    int read;
+	    while((read = in.read(buffer)) != -1){
+	      out.write(buffer, 0, read);
+	    }
+	}
+	
+	public static void copyFile(String Src, String Target) throws IOException {
+		
+		InputStream in = new FileInputStream(Src);
+		OutputStream out = new FileOutputStream(Target);
 	    byte[] buffer = new byte[1024];
 	    int read;
 	    while((read = in.read(buffer)) != -1){
@@ -56,45 +99,102 @@ public class FileManager {
 	    File baseDir = new File(AppPreference.BASE_DIR());
 	    File tempDir = new File(AppPreference.TEMP_DIR());	
 	    File jarDir = new File(AppPreference.JAR_DIR());	
+	    
 	    if(!baseDir.exists()){
-	    	baseDir.mkdir();	
-	    	tempDir.mkdir();
-	    	jarDir.mkdir();
-	    }else{
-		    if(!tempDir.exists()){
-		    	tempDir.mkdir();	   
-		    }
-		    if(!jarDir.exists()){
-		    	jarDir.mkdir();	   
-		    }
+	    	baseDir.mkdirs();	
+	    }
+	    if(!tempDir.exists()){
+		    tempDir.mkdirs();	   
+		}
+		    
+	    if(!jarDir.exists()){
+		    jarDir.mkdirs();	   
 	    }
 	}
 	
 	
-	public static void unzip(String path) throws IOException {		  
-	    File baseDir = new File(AppPreference.BASE_DIR());
-	    File tempDir = new File(AppPreference.TEMP_DIR());		    
-	    if(!baseDir.exists()){
-	    	baseDir.mkdir();	
-	    	tempDir.mkdir();
-	    }else if(!tempDir.exists()){
-	    	tempDir.mkdir();	   
-	    }
+	
+	static public void unzip(String zipFile,String to) throws ZipException, IOException 
+	{
+	    Log.i(TAG,zipFile);
+	    int BUFFER = 2048;
+	    File file = new File(zipFile);
+
+	    ZipFile zip = new ZipFile(file);
+	  //removing extention name
+	    String newPath = to;
 	    
-    	InputStream is = new FileInputStream(path);
+	    Log.i(TAG,"new path ="+newPath);
+	    new File(newPath).mkdir();
+	    Enumeration<? extends ZipEntry> zipFileEntries = zip.entries();
+
+	    // Process each entry
+	    while (zipFileEntries.hasMoreElements())
+	    {
+	        // grab a zip file entry
+	        ZipEntry entry = (ZipEntry) zipFileEntries.nextElement();
+	        String currentEntry = entry.getName();
+	        File destFile = new File(newPath, currentEntry);
+	        //destFile = new File(newPath, destFile.getName());
+	        File destinationParent = destFile.getParentFile();
+
+	        // create the parent directory structure if needed
+	        destinationParent.mkdirs();
+
+	        if (!entry.isDirectory())
+	        {
+	            BufferedInputStream is = new BufferedInputStream(zip
+	            .getInputStream(entry));
+	            int currentByte;
+	            // establish buffer for writing file
+	            byte data[] = new byte[BUFFER];
+
+	            // write the current file to disk
+	            FileOutputStream fos = new FileOutputStream(destFile);
+	            BufferedOutputStream dest = new BufferedOutputStream(fos,
+	            BUFFER);
+
+	            // read and write until last byte is encountered
+	            while ((currentByte = is.read(data, 0, BUFFER)) != -1) {
+	                dest.write(data, 0, currentByte);
+	            }
+	            dest.flush();
+	            dest.close();
+	            is.close();
+	        }
+
+	      /*  if (currentEntry.endsWith(".zip"))
+	        {
+	            // found a zip file, try to open
+	        	unzip(destFile.getAbsolutePath());
+	        }*/
+	    }
+	}
+	
+	/*public static void unzip(String from,String to) throws IOException {		  
+	   
+		 new File(to+"/data").mkdirs(); 
+		 new File(to+"/transfer_classes").mkdirs(); 
+		
+    	 
+    	
+	    
+    	InputStream is = new FileInputStream(from);
     	ZipInputStream zis = new ZipInputStream(new BufferedInputStream(is));
     	try {
 		     ZipEntry ze;
 		     
 		     while ((ze = zis.getNextEntry()) != null) {  
 		    	 String name = ze.getName();
+		    	 Log.i(TAG,to+"/"+name);
 		         if(ze.isDirectory()) { 
-		        	 File f = new File(tempDir+"/"+name); 
+		        	 File f = new File(to+"/"+name); 
+		        	 
 		        	 if(!f.isDirectory()) { 
 						  f.mkdirs(); 
 		        	 } 
 		           } else { 
-		        	 FileOutputStream fout = new FileOutputStream(tempDir+"/"+ name); 
+		        	 FileOutputStream fout = new FileOutputStream(to+"/"+ name); 
 		             for (int c = zis.read(); c != -1; c = zis.read()) { 
 		            	 fout.write(c); 
 		             } 
@@ -103,7 +203,7 @@ public class FileManager {
  		} finally {
  			zis.close();
       	}       
-	}
+	}*/
 
 
 
@@ -111,6 +211,7 @@ public class FileManager {
 	public static Boolean move(String oldpath,String newpath){
 		File dir = new File(oldpath);
 		File file = new File(newpath);
+		file.mkdirs();
 		if(dir.renameTo(file)){
 			return true;
 		}
