@@ -278,14 +278,14 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 	        	_outputText.setText(outputText);
 	        	progressDialog.dismiss();
 	            break;
-	        case 2:
+	      /*  case 2:
 	        	progressDialog.dismiss();
 	        	try {
 					Translator.setBase(rulesHandler.getClassLoader());
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-	            break;
+	            break; */
 	        }
 	    }
 	};
