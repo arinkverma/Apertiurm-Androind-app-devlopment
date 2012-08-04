@@ -54,6 +54,7 @@ public class DownloadActivity extends Activity  implements OnClickListener{
     private String []LIST = null;
     private String []Address = null;
     private String toDownload = null;
+    private String toDownloadTitle = null;
     private int FILE_SIZE = 0;
     private String ModifiedSince = null;
 
@@ -72,7 +73,8 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 	    
 	    progressDialog = new ProgressDialog(thisActivity);
 	    progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-	    progressDialog.setTitle("Downloading\nSVN List");
+	    progressDialog.setTitle(getString(R.string.downloading)+"\n"+getString(R.string.package_list));
+		
 	    progressDialog.setCancelable(false);
 	    progressDialog.show();
 
@@ -155,13 +157,14 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 		        	SimpleDateFormat sdf = new SimpleDateFormat("MMM dd,yyyy HH:mm:ss");		        	 
 		        	Date resultdate = new Date(Long.parseLong(ModifiedSince));		        
 		        	if(isListLoaded == false){
-		        		progressDialog.setTitle("Fetching List"+"\n"+FILE_SIZE+"kb\nLastmodified "+sdf.format(resultdate));
-		        		progressDialog.setMessage("Downloading ["+ FILE_SIZE+"kb]");
+		        		progressDialog.setTitle(getString(R.string.downloading)+"\n"+getString(R.string.package_list));
+		        		progressDialog.setMessage(getString(R.string.lastmodified)+" "+sdf.format(resultdate)+"\n"+getString(R.string.downloading)+" ["+ FILE_SIZE+"kb]");
 		        	}else{
-		    		    progressDialog.setTitle("Downloading "+"\n"+FILE_SIZE+"kb\nLastmodified "+sdf.format(resultdate));
-		        		progressDialog.setMessage("Downloading ["+ FILE_SIZE+"kb]");
+		        		progressDialog.setTitle(getString(R.string.downloading)+"\n"+toDownloadTitle+" ("+FILE_SIZE+"KB)");
 		        	}
-
+		        	
+		        	
+		        	
 		        	Log.i(TAG,"Download started "+ FILE_SIZE+"kb");
 		        	break;
 
@@ -171,8 +174,11 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 		        	int percent = 0;
 		        	if(FILE_SIZE>0){
 		        		percent = (100*currentProgress)/FILE_SIZE;
-		        		progressDialog.setMessage(currentProgress+"kb/"+FILE_SIZE+"kb completed");
-		        		progressDialog.setProgress(percent);
+		        		if(progressDialog.isShowing()){
+		        			progressDialog.setProgress(percent);
+		        		}else{
+		        			FileManager.DownloadCancel();
+		        		}
 		        	}
 	                Log.i(TAG,"Progessbar "+currentProgress+"kb ,"+percent+"%");
 	                break;
@@ -192,8 +198,8 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 		            final AlertDialog.Builder ErrorDialog = new AlertDialog.Builder(thisActivity);
 		            ErrorDialog.setIcon(android.R.drawable.ic_dialog_alert);
 
-		            ErrorDialog.setMessage("Error :"+error);
-		            ErrorDialog.setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+		            ErrorDialog.setMessage(getString(R.string.error)+" :"+error);
+		            ErrorDialog.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
 	                    public void onClick(DialogInterface dialog, int whichButton) {
 	                    	thisActivity.finish();
 	                    }
@@ -207,7 +213,7 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 		    //parse html if svn list download
 	        case   FileManager.MESSAGE_DOWNLOAD_COMPLETE :
 	        	if(isListLoaded == false){
-		        	progressDialog.setMessage("Generating view");
+		        	progressDialog.setMessage(getString(R.string.loading));
 		        	ParseHtmlRun();
 		        	Log.i(TAG,"Download complete");
 		        	isListLoaded = true;
@@ -235,6 +241,7 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 	    				TextView v = (TextView) view;
 	    				Toast.makeText(getApplicationContext(), v.getText(),   Toast.LENGTH_SHORT).show();
 	    				toDownload = Address[position];
+	    				toDownloadTitle = LIST[position];
 						// start the download immediately
 	    			    startDownload();
 	    			    
@@ -252,9 +259,9 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 
 	private void startDownload() {
 		progressDialog = new ProgressDialog(thisActivity);
-		progressDialog.setTitle("Downloading\n"+toDownload);
+		progressDialog.setTitle(getString(R.string.downloading)+"\n"+toDownloadTitle);
 		progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-		progressDialog.setCancelable(false);
+		progressDialog.setCancelable(true);
 		progressDialog.show();
 		FileManager.DownloadRun(AppPreference.SVN_ADDRESS+toDownload,AppPreference.TEMP_DIR+"/"+toDownload,thisActivity.handler);
 	}
@@ -266,7 +273,7 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 			isListLoaded = false;
 			progressDialog = new ProgressDialog(thisActivity);
 		    progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-		    progressDialog.setTitle("Downloading\nSVN List");
+			progressDialog.setTitle(getString(R.string.downloading)+"\n"+getString(R.string.package_list));
 		    progressDialog.setCancelable(false);
 		    progressDialog.show();
 			FileManager.DownloadRun(AppPreference.SVN_ADDRESS,AppPreference.TEMP_DIR+"/svn.html",thisActivity.handler);

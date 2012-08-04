@@ -16,6 +16,7 @@ import org.apertium.android.helper.AppPreference;
 import org.apertium.android.languagepair.RulesHandler;
 import org.apertium.android.languagepair.TranslationMode;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
@@ -39,6 +40,7 @@ import android.widget.Toast;
 
 public class ModeManageActivity extends ListActivity {
 	String TAG = "ModeManageActivity";
+	private Activity thisActivity = null;
 
 	private DatabaseHandler DB;
 
@@ -50,12 +52,12 @@ public class ModeManageActivity extends ListActivity {
 	private static ProgressDialog progressDialog;
 	private static String packagetoRemove;
 	private String PrefToSet = null;
-
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
-
+	    thisActivity = this;
 	    Intent intent = getIntent();
 		Bundle extras = intent.getExtras();
 	    if (extras != null) {
@@ -76,9 +78,8 @@ public class ModeManageActivity extends ListActivity {
 	    }
 
 	    ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, android.R.id.text1, ModeTitle);
-
+	
 	    this.setListAdapter(adapter);
-
 
 	    ListView lv = getListView();
 	    lv.setTextFilterEnabled(true);
@@ -105,19 +106,29 @@ public class ModeManageActivity extends ListActivity {
 	            final TranslationMode tobeRemove = DB.getMode(ModeId[pos]);
 
 	            final String pack = tobeRemove.getPackage();
-	            b.setMessage("Are you sure want to remove this package?");
-	            b.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+	            b.setTitle(getString(R.string.confirm_packageRemove));
+	            String message = "";
+	            List<TranslationMode> removeModes =  DB.getModes(pack);
+	            for(int i=0;i<removeModes.size();i++){
+	            	message += ((TranslationMode) removeModes.get(i)).getTitle()+"\n";
+	            }
+	            b.setMessage(message);
+	            b.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
 	                    public void onClick(DialogInterface dialog, int whichButton) {
 	                    	packagetoRemove = pack;
 
-	                    	run0();
+	                    	FileRemoveRun();
 
-	        	            if(tobeRemove.getPackage().equals(rulesHandler.getCurrentPackage())){
+	                    	String currentPackage = rulesHandler.getCurrentPackage();
+	                    	
+	                    	Log.i(TAG,"PacketToRemove = "+packagetoRemove+", CurrentPackage = "+currentPackage);
+	        	            if(currentPackage!=null && packagetoRemove.equals(currentPackage)){
 	        	            	rulesHandler.resetCurrentMode();
 	        	            }
+	 
 	                    }
 	            });
-	            b.setNegativeButton("No", new DialogInterface.OnClickListener() {
+	            b.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
 	                    public void onClick(DialogInterface dialog, int whichButton) {
 	                       // yesOrNo = 0;
 	                    }
@@ -151,13 +162,14 @@ public class ModeManageActivity extends ListActivity {
 
 	/*Removing Package Entries*/
 
-	private void run0(){
-		progressDialog = ProgressDialog.show(this, "Removing..", "Removing database entries", true,false);
+	private void FileRemoveRun(){
+		progressDialog = ProgressDialog.show(this, getString(R.string.deleting)+"...", getString(R.string.removing_files), true,false);
 	    Thread t = new Thread() {
 	        @Override
 	        public void run() {
 	        	try {
-	        		File file = new File(AppPreference.BASE_DIR+"/"+packagetoRemove);
+	        		Log.i(TAG,"removing file="+AppPreference.JAR_DIR+"/"+packagetoRemove);
+	        		File file = new File(AppPreference.JAR_DIR+"/"+packagetoRemove);
 	        		FileManager.remove(file);
 	        	} catch (Exception e) {
 					e.printStackTrace();
@@ -171,7 +183,7 @@ public class ModeManageActivity extends ListActivity {
 	}
 
 	/*Removing Package files*/
-	private void run1(){
+	private void DB_EntriesRemoveRun(){
 		Thread t = new Thread() {
 	        @Override
 	        public void run() {
@@ -193,11 +205,14 @@ public class ModeManageActivity extends ListActivity {
 	    public void handleMessage(Message msg) {
 	        switch(msg.what){
 	        case 0:
-	        	progressDialog.setMessage("Removing files");
-	        	run1();
+	        	progressDialog.setMessage(getString(R.string.removing_db));
+	        	DB_EntriesRemoveRun();
 	            break;
 	        case 1:
 	        	progressDialog.dismiss();
+	        	AppPreference appPreference = new AppPreference(thisActivity);
+	        	appPreference.SaveState();
+	        	
 	        	Intent myIntent1 = new Intent(ModeManageActivity.this,ModeManageActivity.class);
 	        	ModeManageActivity.this.startActivity(myIntent1);
 	        	finish();

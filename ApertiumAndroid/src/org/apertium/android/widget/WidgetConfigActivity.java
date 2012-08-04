@@ -7,6 +7,7 @@ package org.apertium.android.widget;
 
 import org.apertium.android.ModeManageActivity;
 import org.apertium.android.R;
+import org.apertium.android.DB.DatabaseHandler;
 
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
@@ -27,6 +28,7 @@ public class WidgetConfigActivity extends Activity implements OnClickListener{
 	
 	//Button
 	private Button []_modeButton;
+	private DatabaseHandler DB;
 	
 	private WidgetHandler widgetHandler;
 	private String []Modes = null;	
@@ -49,11 +51,13 @@ public class WidgetConfigActivity extends Activity implements OnClickListener{
 		Log.i(TAG,"Widget ID="+AppWidgetId);
 		
 		if (AppWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
-			finish();
+			this.finish();
+			return;
 		}else{
 			widgetHandler = new WidgetHandler(this.getBaseContext(),AppWidgetId);
 		}
 		
+		 DB = new DatabaseHandler(this.getBaseContext());
 		initView();
 		fillView();
 		
@@ -119,15 +123,20 @@ public class WidgetConfigActivity extends Activity implements OnClickListener{
 		//Add click listener and hiding unused buttons
 		for(int i=0;i<5;i++){
 			Log.i("Mode",Modes[i]);
-			_modeButton[i].setText(Modes[i]);	
-			_modeButton[i].setOnClickListener(this);
+	
 			
 			//Set visibility of buttons
 			if(Modes[i].equals("+")){
+				_modeButton[i].setText("+");
 				remoteViews.setViewVisibility(ModeButtonCode[i], View.GONE);
 			}else{
+				String modeTitle = DB.getMode(Modes[i]).getTitle();
+				_modeButton[i].setText(modeTitle);	
 				remoteViews.setViewVisibility(ModeButtonCode[i], View.VISIBLE);
 			}
+			
+
+			_modeButton[i].setOnClickListener(this);
 			
 			//Set assgined mode
 			remoteViews.setTextViewText(ModeButtonCode[i], Modes[i]);

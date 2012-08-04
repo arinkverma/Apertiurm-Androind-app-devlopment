@@ -34,7 +34,9 @@ public class ClipboardHandler {
 			 text =  clipboard.getText().toString();
 		 } else {
 			 android.content.ClipboardManager clipboard = (android.content.ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE); 
-			 text =  clipboard.getText().toString();
+			 if(clipboard.getText()!=null){
+				 text =  clipboard.getText().toString();
+			 }
 		 }
 		return text;
 	}

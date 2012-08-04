@@ -10,6 +10,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apertium.android.filemanager.FileManager;
 import org.apertium.android.helper.AppPreference;
 import org.apertium.android.languagepair.LanguagePackage;
 import org.apertium.android.languagepair.TranslationMode;
@@ -229,6 +230,9 @@ public class DatabaseHandler {
     
     //Get mode by id
     public TranslationMode getMode(String Mode_ID) {
+    	if(Mode_ID == null){
+    		return null;
+    	}
     	OpenHelper openHelper = new OpenHelper(this.context);
 	    SQLiteDatabase db = openHelper.getReadableDatabase();
     	        
@@ -303,15 +307,29 @@ public class DatabaseHandler {
     	File JARDIR = new File(AppPreference.JAR_DIR);
     	File[] files = JARDIR.listFiles();
     	for(int i=0;i<files.length;i++){
-    		Log.i(TAG,files[i].getAbsolutePath()+"/"+files[i].getName()+".jar");
-			try {
-				LanguagePackage languagePackage = new LanguagePackage(files[i].getAbsolutePath()+"/"+files[i].getName()+".jar",files[i].getName());
-				languagePackage.setModifiedDate(files[i].lastModified()+"");
-				addLanuagepair(languagePackage);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}	
+    		if(files[i].isDirectory()){
+	    		Log.i(TAG,files[i].getAbsolutePath()+"/"+files[i].getName()+".jar");
+				try {
+					LanguagePackage languagePackage = new LanguagePackage(files[i].getAbsolutePath()+"/"+files[i].getName()+".jar",files[i].getName());
+					languagePackage.setModifiedDate(files[i].lastModified()+"");
+					List<TranslationMode> TranslationModes = languagePackage.getAvailableModes();
+					if(TranslationModes.isEmpty()){
+						FileManager.remove(files[i]);
+					}else{
+						addLanuagepair(languagePackage);
+					}
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+					FileManager.remove(files[i]);
+				}	
+    		}else{
+				FileManager.remove(files[i]);
+    		}
     	}
+    	
+    	File TempDIR = new File(AppPreference.TEMP_DIR);
+    	FileManager.remove(TempDIR);
     	
     	db.close();
     }

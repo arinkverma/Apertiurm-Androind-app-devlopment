@@ -3,11 +3,11 @@ package org.apertium.android.languagepair;
 
 public class TranslationMode {
     //private variables
-    private String _id;
-    private String _title;
-    private String _package;
-    private String _from;
-    private String _to;
+    private String _id = null;
+    private String _title = null;
+    private String _package = null;
+    private String _from = null;
+    private String _to = null;
     
     public TranslationMode(String id,String title){  
     	this._id = id;
@@ -47,6 +47,14 @@ public class TranslationMode {
     
     public String getPackage(){
     	return this._package;
+    }
+    
+    public boolean isValid(){
+    	return (this._id != null && 
+    			this._title != null && 
+    			this._package != null && 
+    			this._from != null && 
+    			this._to != null);
     }
 
 }

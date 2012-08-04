@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import org.apertium.Translator;
 import org.apertium.android.DB.DatabaseHandler;
 import org.apertium.android.filemanager.FileManager;
 import org.apertium.android.helper.AppPreference;
@@ -16,7 +17,9 @@ import org.apertium.android.languagepair.LanguagePackage;
 import org.apertium.android.languagepair.TranslationMode;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -43,63 +46,63 @@ public class InstallActivity extends Activity implements OnClickListener {
 	private String _lastModified = null;
 	private String FileName = null;
 	
-	//Action to be perform
-	private enum Action  {install,update,discard};
-	Action todo;
-	
 	private static ProgressDialog progressDialog;
 	
 	//To pharse and manage Config.json
 	private LanguagePackage languagePackage;
+	
+	private Activity thisActivity = null;
 	
 	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
+	    
+	    thisActivity = this;
 
 	    initView();
 		
-		todo = Action.install;
 		
 		try {
-			
-			
 			languagePackage = new LanguagePackage(this._path,this._packageID);
 			languagePackage.setModifiedDate(this._lastModified);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		Info1.append("\nName: "+languagePackage.PackageTitle()+"\n");
-		//At present no version number is supported 
-		//Info1.append("Ver: "+config.Version()+"\n");
-	
-		
-		/* Checking the version of package, hence perform action accordingly */
-		String LastDate = DB.getLastModifiedDate(languagePackage.PackageID());
-		
-		if(LastDate!=null){
-			if(LastDate.equals(this._lastModified)){	
-				todo = Action.discard;
-				_submitButton.setText("This version is already installed!");
-			}else{
-				todo = Action.update;				
-				_submitButton.setText("Update");
-			}
-		}
-		
+		Info1.append("\n"+languagePackage.PackageTitle()+"\n");		
 		
 		/* Finding the mode present in the package */		
 		this.translationModes = languagePackage.getAvailableModes();			
 		
 		
-		Heading2.setText("Modes found!");
+		Heading2.setText(getString(R.string.modes));
 		Info2.setText("");
+		
+	
 		for (int i=0; i<this.translationModes.size(); i++) {
 			TranslationMode M = this.translationModes.get(i);
-			Info2.append((i+1)+". "+M.getID()+"\n");						
+			Info2.append((i+1)+". "+Translator.getTitle(M.getID())+"\n");						
 		}
 		
+	}
+	
+	boolean isPackageValid(){
+		String extn = this.FileName.substring(this.FileName.length() - 3, this.FileName.length());
+		if(!extn.equalsIgnoreCase("jar")){
+			return false;
+		}else{
+			try {
+				Translator.setBase(this._path);
+				if(Translator.getAvailableModes()==null || Translator.getAvailableModes().length ==0){
+					return false;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				return false;
+			}
+		}
+		return true;	
 	}
 	
 	
@@ -109,25 +112,57 @@ public class InstallActivity extends Activity implements OnClickListener {
 		Log.i(TAG,"InitView Started");
 	    Bundle extras = getIntent().getExtras();
 	    this._path = extras.getString("filepath");
-	    this.FileName = extras.getString("filename");    		
+	    this.FileName = extras.getString("filename");  
+	    
+	    
+	    if(!isPackageValid()){
+	        final AlertDialog.Builder b = new AlertDialog.Builder(this);
+	        b.setIcon(android.R.drawable.ic_dialog_alert);
+	        b.setCancelable(false);
+	        b.setMessage(this.FileName+"\n"+getString(R.string.invalid_jar));
+	        b.setNegativeButton(getString(R.string.back), new DialogInterface.OnClickListener() {
+	                public void onClick(DialogInterface dialog, int whichButton) {
+	                	thisActivity.finish();
+	                }
+	        });
+	
+	        b.show();
+	    }
+	    
 	    this._packageID =  this.FileName.substring(0, this.FileName.length() - 4);
 	    this._lastModified = extras.getString("filedate");
 	    
 		DB = new DatabaseHandler(this.getBaseContext());
+		
 	    setContentView(R.layout.install_package);
 		Heading1 = (TextView) findViewById(R.id.textView1);
 		Info1 = (TextView) findViewById(R.id.textView2);
-		Heading2 = (TextView) findViewById(R.id.textView3);
-		Info2 = (TextView) findViewById(R.id.textView4);
-		_submitButton = (Button) findViewById(R.id.installButton);
-		_cancelButton = (Button) findViewById(R.id.discardButton);
-
 		Heading1.setText("Package");
 		Info1.setText(this._path);
-		_submitButton.setText("Install");
 		
-		_submitButton.setOnClickListener(this);
-		_cancelButton.setOnClickListener(this);	
+		
+		Heading2 = (TextView) findViewById(R.id.textView3);
+		Info2 = (TextView) findViewById(R.id.textView4);
+		
+		_submitButton = (Button) findViewById(R.id.installButton);
+		_cancelButton = (Button) findViewById(R.id.discardButton);
+		_submitButton.setText(R.string.install);
+		
+		LanguagePackage installedPackage = DB.getPackage(this._packageID);
+		if(installedPackage!=null){
+			String installedDate = installedPackage.ModifiedDate();
+			if(this._lastModified == null || installedDate == null || this._lastModified.equals(installedDate)){
+				_submitButton.setText(R.string.update);
+			}else{
+				_submitButton.setText(R.string.reinstall);
+			}
+		}
+
+			
+			_submitButton.setOnClickListener(this);
+			_cancelButton.setOnClickListener(this);	
+		
+		
 	}
 	
 
@@ -135,12 +170,16 @@ public class InstallActivity extends Activity implements OnClickListener {
 	@Override
 	public void onClick(View v) {
 		if (v.equals(_submitButton)){
-			if(todo == Action.install){
+			String Action =  (String) _submitButton.getText();
+			if(Action.equals(getString(R.string.install))){
 				//First run to copy new package
 				Log.d("Todo","install");
+				
+				progressDialog = ProgressDialog.show(this, getString(R.string.installing)+"...", getString(R.string.unziping), true,false);
 				run1();	
-			}else if(todo == Action.update){
+			}else if(Action.equals(getString(R.string.update)) || Action.equals(getString(R.string.reinstall))){
 				//Zero run to remove previous package
+				progressDialog = ProgressDialog.show(this, getString(R.string.installing)+"...", getString(R.string.removing_old), true,false);
 				run0();					
 			}else{
 				finish();
@@ -156,8 +195,7 @@ public class InstallActivity extends Activity implements OnClickListener {
 //Step 0 
 //Removing old files and data
 		private void run0(){		
-			progressDialog = ProgressDialog.show(this, "Installing..", "Removing old files and data", true,false);
-		    Thread t = new Thread() {
+			Thread t = new Thread() {
 		        @Override
 		        public void run() {
 		        	try {
@@ -165,8 +203,8 @@ public class InstallActivity extends Activity implements OnClickListener {
 		        		FileManager.remove(file);
 		        		DB.deletePackage(languagePackage.PackageID());
 		        	} catch (Exception e) {
-						Heading1.setText("Error!");
-						Info1.setText("Cannot remove old package");
+						Heading1.setText(getString(R.string.error));
+						Info1.setText(R.string.error_removing_old);
 						e.printStackTrace();
 					}
 		            Message msg = Message.obtain();
@@ -181,9 +219,7 @@ public class InstallActivity extends Activity implements OnClickListener {
 //Step 1
 //Unziping file in temp dir
 	private void run1(){	
-		if(todo == Action.install){
-			progressDialog = ProgressDialog.show(this, "Installing..", "Unziping files", true,false);
-		}
+
 	    Thread t = new Thread() {
 	        @Override
 	        public void run() {
@@ -250,15 +286,15 @@ public class InstallActivity extends Activity implements OnClickListener {
 	    public void handleMessage(Message msg) {
 	        switch(msg.what){
 	        case 0:
-	        	progressDialog.setMessage("Unziping files");
+	        	progressDialog.setMessage(getString(R.string.unziping));
 	        	run1();
 	            break;
 	        case 1:
-	        	progressDialog.setMessage("Copying new files");
+	        	progressDialog.setMessage(getString(R.string.copying));
 	        	run2();
 	            break;	        	
 	        case 2:
-	        	progressDialog.setMessage("Writing database");
+	        	progressDialog.setMessage(getString(R.string.writing_db));
 	        	run3();
 	            break;
 	        case 3:
@@ -267,10 +303,6 @@ public class InstallActivity extends Activity implements OnClickListener {
 	        	InstallActivity.this.startActivity(myIntent1);
 	        	finish();
 	            break;
-	        
-	        case -1:
-	        	progressDialog.dismiss();
-	        	Info1.setText("Error occur while installion");
 	        	
 	        }
 	    }

@@ -241,8 +241,11 @@ public class FileManager {
     // constants
     public static final int DOWNLOAD_BUFFER_SIZE = 4096;
     
+    private static boolean isDownloadRun = true;
+    
 	public static void DownloadRun(final String Source,final String Target,final Handler handler){
-	    Thread t = new Thread() {
+		isDownloadRun = true;
+		Thread downloadThread  = new Thread() {
 	        @Override
 	        public void run() {
 				URL url;
@@ -278,20 +281,21 @@ public class FileManager {
 	                        outStream = new BufferedOutputStream(fileStream, DOWNLOAD_BUFFER_SIZE);
 	                        byte[] data = new byte[DOWNLOAD_BUFFER_SIZE];
 	                        int bytesRead = 0, totalRead = 0;
-	                        while(!isInterrupted() && (bytesRead = inStream.read(data, 0, data.length)) >= 0) {
+	                        while(isDownloadRun && !isInterrupted() && (bytesRead = inStream.read(data, 0, data.length)) >= 0) {
 	                                outStream.write(data, 0, bytesRead);	                                
 	                                // update progress bar
 	                                totalRead += bytesRead;
 	                                int totalReadInKB = totalRead / 1024;
 	                                msg = Message.obtain(handler,MESSAGE_UPDATE_PROGRESS_BAR,totalReadInKB,0);
 	    	        	            handler.sendMessage(msg);
+	    	        	            
 	                        }
 	                        
 	                        outStream.close();
 	                        fileStream.close();
 	                        inStream.close();
 	                        
-	                        if(isInterrupted()) {
+	                        if(isInterrupted() || !isDownloadRun) {
 	                                // the download was canceled, so let's delete the partially downloaded file
 	                                outFile.delete();
 	                        }
@@ -307,9 +311,12 @@ public class FileManager {
 	                }
 	        }
 	    };
-	    t.start();
+	    downloadThread.start();
 	}
 	
+	public static void DownloadCancel(){
+		isDownloadRun = false;
+	}
 	
 	public static void FileInfoRun(final String Source,final Handler handler){
 	    Thread t = new Thread() {

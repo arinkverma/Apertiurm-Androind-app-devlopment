@@ -45,34 +45,34 @@ public class RulesHandler extends SecureClassLoader{
 	    editor.commit();
 	}
 
-
 	public void resetCurrentMode(){
-	    editor.putString(_CurrentMode, "??-??");
+	    editor.putString(_CurrentMode, null);
 	    editor.commit();
 	}
 
 	public boolean isSetCurrentMode(){
-		String mode = settings.getString(_CurrentMode, "??-??" );
-		if(mode.equals("??-??")){
+		String mode = settings.getString(_CurrentMode, null );
+		if(mode==null){
 			return false;
 		}
 		return true;
 	}
 
 	public String getCurrentPackage(){
-		String mode = settings.getString(_CurrentMode, "??-??" );
-		if(mode.equals("??-??")){
+		String mode = settings.getString(_CurrentMode, null );
+		if(mode==null){
 			return null;
 		}
+		Log.i(TAG,"getting package of mode = "+mode);
 		DatabaseHandler DB = new DatabaseHandler(this.CTX);
 		TranslationMode m = DB.getMode(mode);
-		return m.getPackage();
+		return (m==null)?null:m.getPackage();
 	}
 
 	public String findPackage(String M){
 		DatabaseHandler DB = new DatabaseHandler(this.CTX);
 		TranslationMode m = DB.getMode(M);
-		return m.getPackage();
+		return (m==null)?null:m.getPackage();
 	}
 
 	public String PathCurrentPackage(){
