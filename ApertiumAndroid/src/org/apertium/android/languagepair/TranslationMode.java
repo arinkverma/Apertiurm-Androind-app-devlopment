@@ -18,6 +18,8 @@ public class TranslationMode {
     	this._to = s[1];    	
     }
     
+    
+    
     public String getID(){
     	return this._id;
     }

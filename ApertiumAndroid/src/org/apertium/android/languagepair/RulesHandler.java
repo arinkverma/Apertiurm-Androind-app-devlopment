@@ -45,7 +45,7 @@ public class RulesHandler extends SecureClassLoader{
 	    editor.commit();
 	}
 
-	public void resetCurrentMode(){
+	public void clearCurrentMode(){
 	    editor.putString(_CurrentMode, null);
 	    editor.commit();
 	}

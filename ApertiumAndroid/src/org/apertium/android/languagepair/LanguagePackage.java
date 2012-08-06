@@ -8,7 +8,6 @@ import org.apertium.Translator;
 public class LanguagePackage {		 
 	//private variables
 	private String _package_id;
-	private String _package_title;
 	private List<TranslationMode> _modes;
 	private String _lastDate;
 	private String modifiedDate;
@@ -16,7 +15,6 @@ public class LanguagePackage {
 	
 	
 	public LanguagePackage(String path,String packID) throws Exception {
-		this._package_title = Translator.getTitle(path);
 		Translator.setBase(path);
 		this.modesID = Translator.getAvailableModes();
 		this._modes = new ArrayList<TranslationMode>();
@@ -69,8 +67,5 @@ public class LanguagePackage {
 		return this.modifiedDate;
 	}
 	
-	public String PackageTitle(){
-		return this._package_title;
-	}
 	    
 }

@@ -23,7 +23,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -31,89 +30,67 @@ import android.widget.Button;
 import android.widget.TextView;
 
 public class InstallActivity extends Activity implements OnClickListener {
-	
 	private final String TAG = "InstallActivity";
+	private Activity thisActivity = null;
 
+	/*Layout variable*/
 	//Buttons
-	private Button _submitButton,_cancelButton;
-	
+	private Button submitButton,cancelButton;
 	//Text view
-	private TextView Heading1,Info1,Heading2,Info2;
-	private DatabaseHandler DB;	
+	private TextView heading,info1,info2;
+	
+	/*Mode related variable*/
 	private List<TranslationMode> translationModes;
-	private String _path = null;
-	private String _packageID =  null;
-	private String _lastModified = null;
-	private String FileName = null;
-	
-	private static ProgressDialog progressDialog;
-	
 	//To pharse and manage Config.json
 	private LanguagePackage languagePackage;
+	private String FilePath = null;
+	private String packageID =  null;
+	private String lastModified = null;
+	private String FileName = null;
 	
-	private Activity thisActivity = null;
+	
+    /*Data Handler
+     * Data which persist */
+	private DatabaseHandler dataBaseHandler;
+	
+	/*Process Handlers */
+	/* Lint warning
+	 * This Handler class should be static or leaks might occur 
+	 * Android Lint Problem
+	 */
+	private static Handler handler = null;
+	private ProgressDialog progressDialog = null;
 	
 	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
-	    
 	    thisActivity = this;
+	    getExtrasData();
 
-	    initView();
-		
+	    handler = new Handler();
+	    dataBaseHandler = new DatabaseHandler(thisActivity);
 		
 		try {
-			languagePackage = new LanguagePackage(this._path,this._packageID);
-			languagePackage.setModifiedDate(this._lastModified);
+			languagePackage = new LanguagePackage(this.FilePath,this.packageID);
+			languagePackage.setModifiedDate(this.lastModified);
+			/* Finding the mode present in the package */		
+			translationModes = languagePackage.getAvailableModes();	
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
-		Info1.append("\n"+languagePackage.PackageTitle()+"\n");		
+		}	
 		
-		/* Finding the mode present in the package */		
-		this.translationModes = languagePackage.getAvailableModes();			
-		
-		
-		Heading2.setText(getString(R.string.modes));
-		Info2.setText("");
-		
-	
-		for (int i=0; i<this.translationModes.size(); i++) {
-			TranslationMode M = this.translationModes.get(i);
-			Info2.append((i+1)+". "+Translator.getTitle(M.getID())+"\n");						
-		}
-		
+	    initView();
 	}
 	
-	boolean isPackageValid(){
-		String extn = this.FileName.substring(this.FileName.length() - 3, this.FileName.length());
-		if(!extn.equalsIgnoreCase("jar")){
-			return false;
-		}else{
-			try {
-				Translator.setBase(this._path);
-				if(Translator.getAvailableModes()==null || Translator.getAvailableModes().length ==0){
-					return false;
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				return false;
-			}
-		}
-		return true;	
-	}
-	
-	
-	/* Init View, 
-	 * Initialing view */
-	private void initView() {
-		Log.i(TAG,"InitView Started");
+	void getExtrasData(){
 	    Bundle extras = getIntent().getExtras();
-	    this._path = extras.getString("filepath");
-	    this.FileName = extras.getString("filename");  
+	    this.FilePath = extras.getString("filepath");
+	    this.FileName = extras.getString("filename");
+	    this.lastModified = extras.getString("filedate");
 	    
+	    Log.i(TAG,"getExtrasData filename ="+FileName+", path = "+FilePath+", LastDate="+lastModified);
 	    
 	    if(!isPackageValid()){
 	        final AlertDialog.Builder b = new AlertDialog.Builder(this);
@@ -121,47 +98,51 @@ public class InstallActivity extends Activity implements OnClickListener {
 	        b.setCancelable(false);
 	        b.setMessage(this.FileName+"\n"+getString(R.string.invalid_jar));
 	        b.setNegativeButton(getString(R.string.back), new DialogInterface.OnClickListener() {
-	                public void onClick(DialogInterface dialog, int whichButton) {
-	                	thisActivity.finish();
-	                }
+                public void onClick(DialogInterface dialog, int whichButton) {
+                	thisActivity.finish();
+                }
 	        });
-	
 	        b.show();
 	    }
 	    
-	    this._packageID =  this.FileName.substring(0, this.FileName.length() - 4);
-	    this._lastModified = extras.getString("filedate");
-	    
-		DB = new DatabaseHandler(this.getBaseContext());
+	    this.packageID =  this.FileName.substring(0, this.FileName.length() - 4);
+	}
 		
+	
+	/* Init View, 
+	 * Initialing view */
+	private void initView() {
+		Log.i(TAG,"InitView Started");
 	    setContentView(R.layout.install_package);
-		Heading1 = (TextView) findViewById(R.id.textView1);
-		Info1 = (TextView) findViewById(R.id.textView2);
-		Heading1.setText("Package");
-		Info1.setText(this._path);
+	    /*Sub Heading Titles*/
+		heading = (TextView) findViewById(R.id.textView1);
+		info1 = (TextView) findViewById(R.id.textView2);
+		info2 = (TextView) findViewById(R.id.textView4);
+		info1.setText(this.FilePath);
+		info2.setText("");	
+		for (int i=0; i<this.translationModes.size(); i++) {
+			TranslationMode M = this.translationModes.get(i);
+			info2.append((i+1)+". "+Translator.getTitle(M.getID())+"\n");						
+		}
 		
 		
-		Heading2 = (TextView) findViewById(R.id.textView3);
-		Info2 = (TextView) findViewById(R.id.textView4);
+		/*Action Button*/
+		submitButton = (Button) findViewById(R.id.installButton);
+		cancelButton = (Button) findViewById(R.id.discardButton);
+		submitButton.setText(R.string.install);
 		
-		_submitButton = (Button) findViewById(R.id.installButton);
-		_cancelButton = (Button) findViewById(R.id.discardButton);
-		_submitButton.setText(R.string.install);
-		
-		LanguagePackage installedPackage = DB.getPackage(this._packageID);
+		LanguagePackage installedPackage = dataBaseHandler.getPackage(this.packageID);
 		if(installedPackage!=null){
 			String installedDate = installedPackage.ModifiedDate();
-			if(this._lastModified == null || installedDate == null || this._lastModified.equals(installedDate)){
-				_submitButton.setText(R.string.update);
+			if(this.lastModified == null || installedDate == null || this.lastModified.equals(installedDate)){
+				submitButton.setText(R.string.update);
 			}else{
-				_submitButton.setText(R.string.reinstall);
+				submitButton.setText(R.string.reinstall);
 			}
 		}
 
-			
-			_submitButton.setOnClickListener(this);
-			_cancelButton.setOnClickListener(this);	
-		
+		submitButton.setOnClickListener(this);
+		cancelButton.setOnClickListener(this);	
 		
 	}
 	
@@ -169,47 +150,57 @@ public class InstallActivity extends Activity implements OnClickListener {
 	
 	@Override
 	public void onClick(View v) {
-		if (v.equals(_submitButton)){
-			String Action =  (String) _submitButton.getText();
+		if (v.equals(submitButton)){
+			String Action =  (String) submitButton.getText();
+			
+			progressDialog = ProgressDialog.show(this, getString(R.string.installing)+"...", Action, true,false);
+			
 			if(Action.equals(getString(R.string.install))){
-				//First run to copy new package
-				Log.d("Todo","install");
-				
-				progressDialog = ProgressDialog.show(this, getString(R.string.installing)+"...", getString(R.string.unziping), true,false);
-				run1();	
-			}else if(Action.equals(getString(R.string.update)) || Action.equals(getString(R.string.reinstall))){
 				//Zero run to remove previous package
-				progressDialog = ProgressDialog.show(this, getString(R.string.installing)+"...", getString(R.string.removing_old), true,false);
-				run0();					
+				ExtractRun();	
+			}else if(Action.equals(getString(R.string.update)) || Action.equals(getString(R.string.reinstall))){
+				//First run to copy new package
+				RemoveOldRun();					
 			}else{
 				finish();
 			}
-		}else if(v.equals(_cancelButton)){
+		}else if(v.equals(cancelButton)){
 			finish();
 		}
 	}
 	
-
 	
-/*** Installation in 2 steps */
+	
+/*** Installation in 3 steps 
+ * Step 0 (if updatating) RemoveOldRun() 
+ * Step 1 ExtractRun()
+ * Step 2 FileCopyRun()
+ * Step 3 DataBaseWriteRun()
+ * Step 4 RemoveOtherFileRun()
+ * */
+	
 //Step 0 
 //Removing old files and data
-		private void run0(){		
+		private void RemoveOldRun(){		
 			Thread t = new Thread() {
 		        @Override
 		        public void run() {
 		        	try {
 		        		File file = new File(AppPreference.JAR_DIR+"/"+languagePackage.PackageID());
 		        		FileManager.remove(file);
-		        		DB.deletePackage(languagePackage.PackageID());
+		        		dataBaseHandler.deletePackage(languagePackage.PackageID());
 		        	} catch (Exception e) {
-						Heading1.setText(getString(R.string.error));
-						Info1.setText(R.string.error_removing_old);
+						heading.setText(getString(R.string.error));
+						info1.setText(R.string.error_removing_old);
 						e.printStackTrace();
 					}
-		            Message msg = Message.obtain();
-		            msg.what = 0;
-		            handler.sendMessage(msg);
+		        	
+		        	handler.post(new Runnable() {
+		        		@Override
+						public void run() {
+							ExtractRun();
+						}
+                    });
 		        }
 		    };
 		    t.start();
@@ -218,22 +209,25 @@ public class InstallActivity extends Activity implements OnClickListener {
 	
 //Step 1
 //Unziping file in temp dir
-	private void run1(){	
-
+	private void ExtractRun(){	
+		progressDialog.setMessage(getString(R.string.unziping));
 	    Thread t = new Thread() {
 	        @Override
 	        public void run() {
 	        	
 				try {
-					FileManager.unzip(_path,AppPreference.TEMP_DIR+"/"+_packageID);
+					FileManager.unzip(FilePath,AppPreference.TEMP_DIR+"/"+packageID);
 				} catch (IOException e) {
 					Log.e(TAG,e+"");
 					e.printStackTrace();
 				}
 				
-	            Message msg = Message.obtain();
-	            msg.what = 1;
-	            handler.sendMessage(msg);
+	        	handler.post(new Runnable() {
+	        		@Override
+					public void run() {
+						FileCopyRun();
+					}
+                });
 	        }
 	    };
 	    t.start();
@@ -241,7 +235,8 @@ public class InstallActivity extends Activity implements OnClickListener {
 	
 //Step 2
 //Installing..", "Copying files
-	private void run2(){	
+	private void FileCopyRun(){	
+		progressDialog.setMessage(getString(R.string.copying));
 	    Thread t = new Thread() {
 	        @Override
 	        public void run() {
@@ -250,15 +245,19 @@ public class InstallActivity extends Activity implements OnClickListener {
 				FileManager.move(AppPreference.TEMP_DIR+"/"+languagePackage.PackageID(),AppPreference.JAR_DIR+"/"+languagePackage.PackageID()+"/extract");
 				
 				try {
-					FileManager.copyFile(_path,AppPreference.JAR_DIR+"/"+languagePackage.PackageID()+"/"+languagePackage.PackageID()+".jar");
+					FileManager.copyFile(FilePath,AppPreference.JAR_DIR+"/"+languagePackage.PackageID()+"/"+languagePackage.PackageID()+".jar");
 				} catch (IOException e) {
 					Log.e(TAG,e+"");
 					e.printStackTrace();
 				}
 				
-	            Message msg = Message.obtain();
-	            msg.what = 2;
-	            handler.sendMessage(msg);
+	        	handler.post(new Runnable() {
+	        		@Override
+					public void run() {
+						DataBaseWriteRun();
+					}
+                });
+	        	
 	        }
 	    };
 	    t.start();
@@ -266,45 +265,70 @@ public class InstallActivity extends Activity implements OnClickListener {
 	
 //Step 3
 //Writing database
-	private void run3(){	
-		//progressDialog.setMessage("Writing database");
+	private void DataBaseWriteRun(){	
+		progressDialog.setMessage(getString(R.string.writing_db));
 	    Thread t = new Thread() {
 	        @Override
 	        public void run() {
-	        	DB.addLanuagepair(languagePackage);
-	            Message msg = Message.obtain();
-	            msg.what = 3;
-	            handler.sendMessage(msg);
+	        	dataBaseHandler.addLanuagepair(languagePackage);
+	        	
+	        	handler.post(new Runnable() {
+	        		@Override
+					public void run() {
+						RemoveOtherFileRun();
+					}
+                });
+
+	        }
+	    };
+	    t.start();
+	}
+	
+	//Step 4
+	//Removing  temp files
+	private void RemoveOtherFileRun(){	
+		progressDialog.setMessage(getString(R.string.removing_temp));
+	    Thread t = new Thread() {
+	        @Override
+	        public void run() {
+	        	File file = new File(AppPreference.JAR_DIR+"/"+languagePackage.PackageID()+"/extract");
+	        	File[] childfiles = file.listFiles();
+	        	for(int i=0;i<childfiles.length;i++){
+	        		if(childfiles[i].isDirectory()){
+	        			if(!childfiles[i].getName().equalsIgnoreCase("data")){
+	        				FileManager.remove(childfiles[i]);
+	        			}
+	        		}
+	        	}
+	        	
+	           	progressDialog.dismiss();	
+	        	Intent myIntent1 = new Intent(InstallActivity.this,ModeManageActivity.class);
+	        	InstallActivity.this.startActivity(myIntent1);
+	        	finish();
+	      
 	        }
 	    };
 	    t.start();
 	}
 	
 	
-	private Handler handler = new Handler(){
-	    @Override
-	    public void handleMessage(Message msg) {
-	        switch(msg.what){
-	        case 0:
-	        	progressDialog.setMessage(getString(R.string.unziping));
-	        	run1();
-	            break;
-	        case 1:
-	        	progressDialog.setMessage(getString(R.string.copying));
-	        	run2();
-	            break;	        	
-	        case 2:
-	        	progressDialog.setMessage(getString(R.string.writing_db));
-	        	run3();
-	            break;
-	        case 3:
-	        	progressDialog.dismiss();	
-	        	Intent myIntent1 = new Intent(InstallActivity.this,ModeManageActivity.class);
-	        	InstallActivity.this.startActivity(myIntent1);
-	        	finish();
-	            break;
-	        	
-	        }
-	    }
-	};
+	boolean isPackageValid(){
+		boolean isValid = true;
+		String extn = this.FileName.substring(this.FileName.length() - 3, this.FileName.length());
+		if(!extn.equalsIgnoreCase("jar")){
+			isValid = false;
+		}else{
+			try {
+				Translator.setBase(this.FilePath);
+			} catch (Exception e) {
+				e.printStackTrace();
+				isValid = false;
+			}
+			if(Translator.getAvailableModes()==null || Translator.getAvailableModes().length ==0){
+				isValid = false;
+			}
+		}
+		return isValid;	
+	}
+	
 }

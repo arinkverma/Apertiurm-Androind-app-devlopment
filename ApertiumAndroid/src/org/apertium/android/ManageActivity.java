@@ -15,7 +15,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
@@ -24,19 +23,22 @@ import android.util.Log;
  
 public class ManageActivity extends PreferenceActivity {
 	
-	 ProgressDialog progressDialog;
+	ProgressDialog progressDialog = null;
+	private static Handler handler = null;
 	AppPreference appPreference = null;
 	Activity thisActivity = null;
         @SuppressWarnings("deprecation")
 		@Override
         protected void onCreate(Bundle savedInstanceState) {
-        	
             super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.setting);
-                
-            appPreference = new AppPreference(this);
         	thisActivity = this;
-            this.setTheme(R.style.PreferenceTheme);    
+            addPreferencesFromResource(R.xml.setting);
+            this.setTheme(R.style.PreferenceTheme); 
+            
+            handler = new Handler();
+            appPreference = new AppPreference(this);
+
+   
             /*List Package*/
 			Preference listPref = (Preference) findPreference("listPref");
 			listPref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
@@ -136,17 +138,17 @@ public class ManageActivity extends PreferenceActivity {
         			 Thread t = new Thread() {
         				 @Override
         			     public void run() {
-        					 DatabaseHandler DB = new DatabaseHandler(thisActivity);
+        					DatabaseHandler DB = new DatabaseHandler(thisActivity);
 			        		DB.updateDB();
 			        		
-			            	
-			        		Message msg;
+			        		  handler.post(new Runnable() {
+			                      @Override
+			                      public void run() {
+			                          progressDialog.dismiss();
+			                      }
+			                  });
 			                
-			                
-							msg = Message.obtain();
-							msg.what = 1;
-							handler.sendMessage(msg);
-        			        }
+	       			        }
         			        };
         			t.start();
         			
@@ -154,18 +156,5 @@ public class ManageActivity extends PreferenceActivity {
                 }
             });
             
-        }
-        
-        private Handler handler = new Handler(){
-    	    @Override
-    	    public void handleMessage(Message msg) {
-    	        switch(msg.what){
-    	        case 1:progressDialog.dismiss();
-    	        break;
-    	        
-    	        }
-    	    }
-        };
-    	        
-        
+        }    	        
 }

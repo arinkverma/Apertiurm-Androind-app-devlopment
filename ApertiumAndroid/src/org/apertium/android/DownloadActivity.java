@@ -6,19 +6,14 @@
 
 package org.apertium.android;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.apertium.Translator;
+import org.apertium.android.Internet.InternetManifest;
+import org.apertium.android.Internet.ManifestRow;
 import org.apertium.android.filemanager.FileManager;
 import org.apertium.android.helper.AppPreference;
 
@@ -51,12 +46,10 @@ public class DownloadActivity extends Activity  implements OnClickListener{
     private boolean isListLoaded = false;
 
     private ListView listView;
-    private String []LIST = null;
-    private String []Address = null;
-    private String toDownload = null;
-    private String toDownloadTitle = null;
     private int FILE_SIZE = 0;
     private String ModifiedSince = null;
+    private InternetManifest internetManifest = null;
+    private ManifestRow toDownload = null;
 
     private Button _reloadButton;
   
@@ -64,7 +57,9 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
-	    setContentView(R.layout.svn_layout);
+	    setContentView(R.layout.download_layout);
+		FileManager.setDIR();
+	
 	    listView  = (ListView) findViewById(R.id.listView1);
 	    thisActivity = this;
 
@@ -78,10 +73,9 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 	    progressDialog.setCancelable(false);
 	    progressDialog.show();
 
-	    File svnCache = new File(AppPreference.TEMP_DIR+"/svn.html");
+	    File svnCache = new File(AppPreference.TEMP_DIR+"/"+AppPreference.MANIFEST_FILE);
 	    if(!svnCache.exists()){
-	    	FileManager.DownloadRun(AppPreference.SVN_ADDRESS,AppPreference.TEMP_DIR+"/svn.html",thisActivity.handler);
-	    	
+	    	FileManager.DownloadRun(AppPreference.SVN_MANIFEST_ADDRESS,AppPreference.TEMP_DIR+"/"+AppPreference.MANIFEST_FILE,thisActivity.handler);
 	    }else{
 	    	progressDialog.setMessage("Generating view");
         	ParseHtmlRun();
@@ -94,41 +88,11 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 	    Thread t = new Thread() {
 	        @Override
 	        public void run() {
-	        	String input="";
-	        	List<String>  Content = new ArrayList<String>();
-	        	List<String>  ContentAddress = new ArrayList<String>();
-	        	InputStream is;
-				try {
-					is = new FileInputStream(AppPreference.TEMP_DIR+"/svn.html");
-					BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-		        	if (is!=null) {
-		        		while ((input = reader.readLine()) != null) {
-		        			String pattern 	= "<li><a href=\"|\">|</a></li>";
-		        			String[] updated = input.split(pattern);
-		        			if(updated.length>2){
-		        				Log.i(updated[1],updated[2] + "\n" );
-		        				Content.add(updated[2]);
-		        				ContentAddress.add(updated[1]);
-		        			}
-		        		}
-		        	}
-
-		           	LIST = new String[Content.size()-1];
-		        	Address = new String[Content.size()-1];
-		        	for(int i=0;i<Content.size()-1;i++){
-		        		
-		           		LIST[i] = Translator.getTitle(AppPreference.SVN_ADDRESS+"/"+Content.get(i+1));
-		        		Address[i] = ContentAddress.get(i+1);
-		        	}
-
-
-		        	is.close();
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
+	        	try {
+	        		internetManifest = new InternetManifest(AppPreference.TEMP_DIR+"/"+AppPreference.MANIFEST_FILE);
+				} catch (IOException e1) {
+					e1.printStackTrace();
 				}
-
 	            Message msg = Message.obtain();
 	            msg.what = HTML_PARSING_DONE;
 	            handler.sendMessage(msg);
@@ -139,7 +103,7 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 
 
 	/* Waiting for Acknowledgement from threads running */
-	private Handler handler = new Handler(){
+	private final Handler handler = new Handler(){
 	    @Override
 	    public void handleMessage(Message msg) {
 	        switch(msg.what){
@@ -160,7 +124,8 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 		        		progressDialog.setTitle(getString(R.string.downloading)+"\n"+getString(R.string.package_list));
 		        		progressDialog.setMessage(getString(R.string.lastmodified)+" "+sdf.format(resultdate)+"\n"+getString(R.string.downloading)+" ["+ FILE_SIZE+"kb]");
 		        	}else{
-		        		progressDialog.setTitle(getString(R.string.downloading)+"\n"+toDownloadTitle+" ("+FILE_SIZE+"KB)");
+		        		
+		        		progressDialog.setTitle(getString(R.string.downloading)+"\n"+Translator.getTitle(toDownload.getpackageMode())+" ("+FILE_SIZE+"KB)");
 		        	}
 		        	
 		        	
@@ -197,8 +162,8 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 
 		            final AlertDialog.Builder ErrorDialog = new AlertDialog.Builder(thisActivity);
 		            ErrorDialog.setIcon(android.R.drawable.ic_dialog_alert);
-
-		            ErrorDialog.setMessage(getString(R.string.error)+" :"+error);
+		            ErrorDialog.setTitle(getString(R.string.error));
+		            ErrorDialog.setMessage(error);
 		            ErrorDialog.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
 	                    public void onClick(DialogInterface dialog, int whichButton) {
 	                    	thisActivity.finish();
@@ -220,8 +185,8 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 	        	}else{
 		        	progressDialog.dismiss();
 		        	Intent myIntent = new Intent(thisActivity, InstallActivity.class);
-			    	myIntent.putExtra("filepath", AppPreference.TEMP_DIR+"/"+toDownload);
-			    	myIntent.putExtra("filename", toDownload);
+		        	myIntent.putExtra("filename",toDownload.getJarFileName());
+			    	myIntent.putExtra("filepath",AppPreference.TEMP_DIR+"/"+toDownload.getJarFileName());
 			    	myIntent.putExtra("filedate",ModifiedSince);
 			    	startActivity(myIntent);
 	        	}
@@ -231,7 +196,7 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 	       //Generate List View after parsing
 	        case HTML_PARSING_DONE:
 	        	progressDialog.dismiss();
-	        	ArrayAdapter<String> adapter = new ArrayAdapter<String>(thisActivity,android.R.layout.simple_list_item_1, android.R.id.text1, LIST);
+	        	ArrayAdapter<String> adapter = new ArrayAdapter<String>(thisActivity,android.R.layout.simple_list_item_1, android.R.id.text1, internetManifest.PackageTitleList());
 	        	listView.setAdapter(adapter);
 	        	listView.setTextFilterEnabled(true);
 	    	    //Set current mode on click
@@ -240,17 +205,13 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 	    	        public boolean onItemLongClick(AdapterView<?> av, View view, int position, final long id) {
 	    				TextView v = (TextView) view;
 	    				Toast.makeText(getApplicationContext(), v.getText(),   Toast.LENGTH_SHORT).show();
-	    				toDownload = Address[position];
-	    				toDownloadTitle = LIST[position];
+	    				toDownload = internetManifest.get(position);
 						// start the download immediately
 	    			    startDownload();
 	    			    
 	    			    return true;
 	    			}
 	    	    });
-
-
-
 	     	    break;
 	        }
 	    }
@@ -259,11 +220,11 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 
 	private void startDownload() {
 		progressDialog = new ProgressDialog(thisActivity);
-		progressDialog.setTitle(getString(R.string.downloading)+"\n"+toDownloadTitle);
+		progressDialog.setTitle(getString(R.string.downloading)+"\n"+Translator.getTitle(toDownload.getpackageMode()));
 		progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 		progressDialog.setCancelable(true);
 		progressDialog.show();
-		FileManager.DownloadRun(AppPreference.SVN_ADDRESS+toDownload,AppPreference.TEMP_DIR+"/"+toDownload,thisActivity.handler);
+		FileManager.DownloadRun(toDownload.getJarURL(),AppPreference.TEMP_DIR+"/"+toDownload.getJarFileName(),thisActivity.handler);
 	}
 
 
@@ -276,7 +237,7 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 			progressDialog.setTitle(getString(R.string.downloading)+"\n"+getString(R.string.package_list));
 		    progressDialog.setCancelable(false);
 		    progressDialog.show();
-			FileManager.DownloadRun(AppPreference.SVN_ADDRESS,AppPreference.TEMP_DIR+"/svn.html",thisActivity.handler);
+			FileManager.DownloadRun(AppPreference.SVN_MANIFEST_ADDRESS,AppPreference.TEMP_DIR+"/svn.html",thisActivity.handler);
 		     
 		}
 		

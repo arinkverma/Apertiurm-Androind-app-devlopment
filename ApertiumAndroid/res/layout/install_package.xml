@@ -46,7 +46,7 @@
                 android:id="@+id/textView1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/NA"
+                android:text="@string/package_Name"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
             <TextView
@@ -59,7 +59,7 @@
                 android:id="@+id/textView3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/NA"
+                android:text="@string/modes"
                 android:layout_marginTop="14dp"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 

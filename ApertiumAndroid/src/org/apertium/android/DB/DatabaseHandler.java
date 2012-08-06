@@ -37,14 +37,11 @@ public class DatabaseHandler {
     private static final String TABLE_MODE 		= "Mode";
     private static final String KEY_MODE_ID 		= "id";
     private static final String KEY_MODE_TITLE 	= "title";
-    private static final String KEY_MODE_PACKAGE 		= "package_id";
+    private static final String KEY_MODE_PACKAGE 	= "package_id";
     
     //Package Table
     private static final String TABLE_PACKAGE 		= "Package";
-//    private static final String KEY_PACKAGE_TITLE 	= "title";
     private static final String KEY_PACKAGE_ID 		= "id";
-//We dont support version at present
-//    private static final String KEY_PACKAGE_VERSION 	= "version";
     private static final String KEY_PACKAGE_LASTMODIFIED = "LastDate";
     
     private Context context;
@@ -140,7 +137,8 @@ public class DatabaseHandler {
 		    	 
 		for(int i=0;i<LangList.size();i++){
 			TranslationMode m = LangList.get(i);
-			String []s = m.getTitle().split("[^\\w]+");
+			Log.e(TAG,m.getTitle());
+			String []s = m.getTitle().split("\\s");
 			if(!TitleList.contains(s[0])){
 				TitleList.add(s[0]);
 			}
@@ -167,10 +165,11 @@ public class DatabaseHandler {
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
-                String []s 	= cursor.getString(1).split("[^\\w]+");	//Title
-                //Ignoring first word
-    			if(!TitleList.contains(s[1])){
-    				TitleList.add(s[1]);
+            	Log.e(TAG,cursor.getString(1));
+                String []s 	= cursor.getString(1).split("\\s");	//Title
+                //Ignoring first 2 word
+    			if(!TitleList.contains(s[2])){
+    				TitleList.add(s[2]);
     			}
     		} while (cursor.moveToNext());
         }

@@ -10,7 +10,6 @@ import java.util.List;
 
 import org.apertium.Translator;
 import org.apertium.android.DB.DatabaseHandler;
-import org.apertium.android.filemanager.FileChooserActivity;
 import org.apertium.android.filemanager.FileManager;
 import org.apertium.android.helper.AppPreference;
 import org.apertium.android.languagepair.RulesHandler;
@@ -24,11 +23,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -42,16 +37,20 @@ public class ModeManageActivity extends ListActivity {
 	String TAG = "ModeManageActivity";
 	private Activity thisActivity = null;
 
-	private DatabaseHandler DB;
-
-	//Rules Manager
-	private RulesHandler rulesHandler;
-
+    /*Mode related variable*/
+	private static String packagetoRemove = null;
 	/* List of installed modes*/
-	private List<TranslationMode> L;
-	private static ProgressDialog progressDialog;
-	private static String packagetoRemove;
+	private List<TranslationMode> listTranslationMode = null;
+	
+    /*Data Handler
+     * Data which persist */
+	private DatabaseHandler dataHandler = null;
+	private RulesHandler rulesHandler = null;
 	private String PrefToSet = null;
+	
+    /*Process Handler*/
+	private static ProgressDialog progressDialog = null;
+	private static Handler handler = null;
 	
 	/** Called when the activity is first created. */
 	@Override
@@ -64,15 +63,17 @@ public class ModeManageActivity extends ListActivity {
 	    	PrefToSet = extras.getString("PrefToSet");
 		}
 
-		DB = new DatabaseHandler(this.getBaseContext());
-		rulesHandler = new RulesHandler(this.getBaseContext());
-	    L = DB.getAllModes();
-	    int len = L.size();
+		dataHandler = new DatabaseHandler(thisActivity);
+		rulesHandler = new RulesHandler(thisActivity);
+		handler = new Handler();
+	    listTranslationMode = dataHandler.getAllModes();
+	    
+	    int len = listTranslationMode.size();
 	    final String[] ModeTitle = new String[len];
 	    final String[] ModeId = new String[len];
 
-	    for (int i = 0; i < L.size(); i++) {
-	    	TranslationMode m = L.get(i);
+	    for (int i = 0; i < len ; i++) {
+	    	TranslationMode m = listTranslationMode.get(i);
 	    	ModeTitle[i] = m.getTitle();
 	        ModeId[i] 	= m.getID();
 	    }
@@ -103,12 +104,12 @@ public class ModeManageActivity extends ListActivity {
 	            final AlertDialog.Builder b = new AlertDialog.Builder(ModeManageActivity.this);
 	            b.setIcon(android.R.drawable.ic_dialog_alert);
 
-	            final TranslationMode tobeRemove = DB.getMode(ModeId[pos]);
+	            final TranslationMode tobeRemove = dataHandler.getMode(ModeId[pos]);
 
 	            final String pack = tobeRemove.getPackage();
 	            b.setTitle(getString(R.string.confirm_packageRemove));
 	            String message = "";
-	            List<TranslationMode> removeModes =  DB.getModes(pack);
+	            List<TranslationMode> removeModes =  dataHandler.getModes(pack);
 	            for(int i=0;i<removeModes.size();i++){
 	            	message += ((TranslationMode) removeModes.get(i)).getTitle()+"\n";
 	            }
@@ -123,7 +124,7 @@ public class ModeManageActivity extends ListActivity {
 	                    	
 	                    	Log.i(TAG,"PacketToRemove = "+packagetoRemove+", CurrentPackage = "+currentPackage);
 	        	            if(currentPackage!=null && packagetoRemove.equals(currentPackage)){
-	        	            	rulesHandler.resetCurrentMode();
+	        	            	rulesHandler.clearCurrentMode();
 	        	            }
 	 
 	                    }
@@ -142,23 +143,6 @@ public class ModeManageActivity extends ListActivity {
 
 	}
 
-	public boolean onCreateOptionsMenu(Menu menu) {
-	      MenuInflater inflater = getMenuInflater();
-	      inflater.inflate(R.menu.manage_menu, menu);
-	      return true;
-	 }
-
-	public boolean onOptionsItemSelected(MenuItem item) {
-	      switch (item.getItemId()) {
-	      case R.id.install:
-	    	  Intent myIntent = new Intent(this, FileChooserActivity.class);
-	    	  ModeManageActivity.this.startActivity(myIntent);
-	    	  return true;
-	      default:
-	            return super.onOptionsItemSelected(item);
-	      }
-	}
-
 
 	/*Removing Package Entries*/
 
@@ -174,9 +158,13 @@ public class ModeManageActivity extends ListActivity {
 	        	} catch (Exception e) {
 					e.printStackTrace();
 				}
-	            Message msg = Message.obtain();
-	            msg.what = 0;
-	            handler.sendMessage(msg);
+	        	
+	        	handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                      	DB_EntriesRemoveRun();
+                    }
+                });
 	        }
 	    };
 	    t.start();
@@ -184,42 +172,27 @@ public class ModeManageActivity extends ListActivity {
 
 	/*Removing Package files*/
 	private void DB_EntriesRemoveRun(){
+		progressDialog.setMessage(getString(R.string.removing_db));
 		Thread t = new Thread() {
 	        @Override
 	        public void run() {
 	        	try {
-	        		DB.deletePackage(packagetoRemove);
+	        		dataHandler.deletePackage(packagetoRemove);
 	        	} catch (Exception e) {
 					e.printStackTrace();
 				}
-	            Message msg = Message.obtain();
-	            msg.what = 1;
-	            handler.sendMessage(msg);
+	        	handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                    	progressDialog.dismiss();
+        	        	AppPreference appPreference = new AppPreference(thisActivity);
+        	        	appPreference.SaveState();
+                    }
+                });
 	        }
 	    };
 	    t.start();
 	}
-
-	private Handler handler = new Handler(){
-	    @Override
-	    public void handleMessage(Message msg) {
-	        switch(msg.what){
-	        case 0:
-	        	progressDialog.setMessage(getString(R.string.removing_db));
-	        	DB_EntriesRemoveRun();
-	            break;
-	        case 1:
-	        	progressDialog.dismiss();
-	        	AppPreference appPreference = new AppPreference(thisActivity);
-	        	appPreference.SaveState();
-	        	
-	        	Intent myIntent1 = new Intent(ModeManageActivity.this,ModeManageActivity.class);
-	        	ModeManageActivity.this.startActivity(myIntent1);
-	        	finish();
-	            break;
-	        }
-	    }
-	};
 
 
 
@@ -243,7 +216,6 @@ public class ModeManageActivity extends ListActivity {
 	  
 	          		Translator.setDelayedNodeLoadingEnabled(true);
 	        		Translator.setMemmappingEnabled(true);
-	        		Translator.setPipingEnabled(false);
 	    		}
     			
         		

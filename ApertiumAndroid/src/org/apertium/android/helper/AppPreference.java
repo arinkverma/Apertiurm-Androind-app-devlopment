@@ -22,7 +22,8 @@ public class AppPreference   {
 	public static final String BASE_DIR = Environment.getExternalStorageDirectory().toString() +"/apertium";
 	public static final String JAR_DIR = Environment.getExternalStorageDirectory().toString() +"/apertium/jars";
 	public static final String TEMP_DIR  = Environment.getExternalStorageDirectory().toString() +"/apertium/temp";
-	public static final String SVN_ADDRESS = "https://apertium.svn.sourceforge.net/svnroot/apertium/branches/gsoc2012/arink/Mikeljar/";
+	public static final String MANIFEST_FILE  = "Manifest";
+	public static final String SVN_MANIFEST_ADDRESS = "http://apertium.svn.sourceforge.net/svnroot/apertium/builds/language-pairs";
 
 	//Preferences name
 	public static final String PREFERENCE_NAME = "ore.apertium.Pref";
