@@ -49,6 +49,7 @@
 	<string name="error">Erreur</string>
 	<string name="error_removing_old">Impossible de supprimer l\'ancien package</string>
 	<string name="file_size">Taille du fichier</string>
+	<string name="inbox"> Boîte de réception </string>
     <string name="invalid_jar">Ce n\'est pas un package JAR valide!</string>
     <string name="installing">Installing</string>
 	<string name="lastmodified">Lastmodified</string>

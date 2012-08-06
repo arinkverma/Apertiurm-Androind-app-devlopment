@@ -59,6 +59,7 @@ public class ApertiumActivity extends Activity implements OnClickListener{
     private String fromLanguage = null;
     private String toLanguage = null;
     private String outputText = null;
+    private String inputText = null;
     private TranslationMode translationMode = null;
     
     /*Data Handler
@@ -83,6 +84,7 @@ public class ApertiumActivity extends Activity implements OnClickListener{
         super.onCreate(savedInstanceState);
         thisActivity = this;
         getExtrasData();
+        
         
         appPreference       = new AppPreference(thisActivity);
         databaseHandler     = new DatabaseHandler(thisActivity);
@@ -135,6 +137,17 @@ public class ApertiumActivity extends Activity implements OnClickListener{
         /* Fetching if mode is sent by widgets */
         getExtrasData();
 
+        /**Giving priority to incoming text from intent over clipboardtext*/
+        if(inputText==null){
+        	if(appPreference.isClipBoardGetEnabled()){
+        		inputText = clipboardHandler.getText();
+            }
+        }
+        
+        if(inputText!=null){
+            inputEditText.setText(inputText);
+        }
+        
         if(currentMode==null){
             currentMode = rulesHandler.getCurrentMode();
         }else{
@@ -163,6 +176,10 @@ public class ApertiumActivity extends Activity implements OnClickListener{
             if(BundleMODE!=null){
                 currentMode = BundleMODE;
             }
+             BundleMODE = extras.getString("input");
+            if(BundleMODE!=null){
+            	inputText = BundleMODE;
+            }
         }
     }
     
@@ -172,8 +189,15 @@ public class ApertiumActivity extends Activity implements OnClickListener{
         Log.i(TAG,"ApertiumActivityInitView Started");
         setContentView(R.layout.main_layout);
         inputEditText       = (EditText) findViewById(R.id.inputtext);
-        if(appPreference.isClipBoardGetEnabled()){
-            inputEditText.setText(clipboardHandler.getText());
+        /**Giving priority to incoming text from intent over clipboardtext*/
+        if(inputText==null){
+        	if(appPreference.isClipBoardGetEnabled()){
+        		inputText = clipboardHandler.getText();
+            }
+        }
+        
+        if(inputText!=null){
+            inputEditText.setText(inputText);
         }
 
         submitButton    = (Button) findViewById(R.id.translateButton);
@@ -449,7 +473,7 @@ public class ApertiumActivity extends Activity implements OnClickListener{
      *  Option menu 
      *  1. share
      *  2. setting
-     *  3. about*/
+     *  3. inbox*/
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.option_menu, menu);
@@ -457,16 +481,18 @@ public class ApertiumActivity extends Activity implements OnClickListener{
      }
 
     public boolean onOptionsItemSelected(MenuItem item) {
+    	Intent myIntent = null;
         switch (item.getItemId()) {
             case R.id.manage:
-                Intent myIntent = new Intent(ApertiumActivity.this, ManageActivity.class);
+                myIntent = new Intent(ApertiumActivity.this, ManageActivity.class);
                 ApertiumActivity.this.startActivity(myIntent);
                 return true;
             case R.id.share:
                 share_text();
                 return true;
-            case R.id.about:
-                Toast.makeText(this, "This is under construction",Toast.LENGTH_SHORT).show();
+            case R.id.inbox:
+                myIntent = new Intent(ApertiumActivity.this, SMSInboxActivity.class);
+                ApertiumActivity.this.startActivity(myIntent);
             default:
                 return super.onOptionsItemSelected(item);
         }
