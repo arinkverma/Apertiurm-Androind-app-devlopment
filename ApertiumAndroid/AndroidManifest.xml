@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.apertium.android"
     android:versionCode="1"
-    android:versionName="2.3" >
+    android:versionName="2.4" >
 
     <uses-sdk android:minSdkVersion="7" 
           android:targetSdkVersion="10"

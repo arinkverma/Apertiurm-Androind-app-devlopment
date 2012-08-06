@@ -8,10 +8,12 @@ Features [version 2.4]
 
 <b>Offline Translation</b>
 <br/>
-![Alt translate](http://4.bp.blogspot.com/-xigQhjHyP_g/UB1n3jUrkZI/AAAAAAAAAzw/2D5b_OzyYFE/s320/device-2012-08-04-230821.png "Translation Activity")
+![Alt translate](http://2.bp.blogspot.com/-3_vZHwpsrN4/UCBXfesCmPI/AAAAAAAAA0E/TG0Xp1SeAeU/s320/device-2012-08-07-051235.png "Translation Activity")
 <ul>
 <li>Complete offline text translation</li>
 <li>Approx 2MB of language package</li>
+<li>Read text from SMS inbox as input for translatioon</li>
+
 </ul>
 
 <b>Download Activity</b>
