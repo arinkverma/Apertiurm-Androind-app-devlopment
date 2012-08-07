@@ -6,10 +6,10 @@
     
     
 	<!-- Menu  -->
-    <string name="about">Sur</string>
-    <string name="copy">Copier sur le presse-papiers</string>
     <string name="manage">Gérer</string>
     <string name="share">Part</string>
+    <string name="inbox"> Boîte de réception</string>
+    <string name="clear">Effacer</string>
     
     
      <!-- Widgets  -->
@@ -20,8 +20,7 @@
     
     <!-- Button  -->
     <string name="arrow">→</string>
-    <string name="back">Dos</string>   
-    <string name="clear">Effacer</string>
+    <string name="back">Dos</string> 
     <string name="discard">Jeter</string>
     <string name="from">&lt;de&gt;</string>
     <string name="install">Installer</string>
@@ -48,9 +47,7 @@
 	<string name="downloading">Téléchargement</string>
 	<string name="error">Erreur</string>
 	<string name="error_removing_old">Impossible de supprimer l\'ancien package</string>
-	<string name="file_size">Taille du fichier</string>
-	<string name="inbox"> Boîte de réception </string>
-    <string name="invalid_jar">Ce n\'est pas un package JAR valide!</string>
+	<string name="invalid_jar">Ce n\'est pas un package JAR valide!</string>
     <string name="installing">Installing</string>
 	<string name="lastmodified">Lastmodified</string>
 	<string name="loading">Chargement</string>

@@ -54,9 +54,11 @@ public class SMSInboxActivity extends ListActivity {
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 		smsObj = adapter.getItem(position);	
-		Intent myIntent = new Intent(SMSInboxActivity.this, ApertiumActivity.class);	
-    	myIntent.putExtra("input", smsObj.getBody());
-    	startActivity(myIntent);
+
+		Intent intent = getIntent();
+    	intent.putExtra("input", smsObj.getBody());
+	    setResult(RESULT_OK, intent);
+	    finish();
 	}
 	
 	public List<SMSobject> getSms() {

@@ -6,10 +6,10 @@
     
     
 	<!-- Menu  -->
-    <string name="about">About</string>
-    <string name="copy">Copy to clipboard</string>
     <string name="manage">Manage</string>
     <string name="share">Share</string>
+    <string name="clear">Clear</string>
+	<string name="inbox">Inbox</string>
     
     
      <!-- Widgets  -->
@@ -21,7 +21,6 @@
     <!-- Button  -->
     <string name="arrow">→</string>
     <string name="back">Back</string>   
-    <string name="clear">Clear</string>
     <string name="discard">Discard</string>
     <string name="from">&lt;from&gt;</string>
     <string name="install">Install</string>
@@ -48,8 +47,6 @@
 	<string name="downloading">Downloading</string>
 	<string name="error">Error</string>
 	<string name="error_removing_old">Cannot remove old package</string>
-	<string name="file_size">Filesize</string>
-	<string name="inbox">Inbox</string>
     <string name="invalid_jar">This is not a valid JAR package!</string>
     <string name="installing">Installing</string>
 	<string name="lastmodified">Lastmodified</string>

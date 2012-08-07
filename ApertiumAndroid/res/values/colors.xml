@@ -5,12 +5,7 @@
     <color name="dark_red">#CC0000</color>
     <color name="black">#000000</color>
     <color name="bright_yellow">#ff8a00</color>
-    
-    <color name="basic_blue1">#5781a9</color>    
+        
     <color name="basic_blue2">#a4bcc6</color>    
     <color name="basic_blue3">#995781a9</color>    
-    <color name="basic_orange1">#99eca14f</color>    
-    <color name="basic_orange2">#66eca14f</color>   
-     <color name="basic_white1">#eeffffff</color>    
-     <color name="basic_white2">#99ffffff</color>
 </resources>

@@ -138,10 +138,8 @@ public class ApertiumActivity extends Activity implements OnClickListener{
         getExtrasData();
 
         /**Giving priority to incoming text from intent over clipboardtext*/
-        if(inputText==null){
-        	if(appPreference.isClipBoardGetEnabled()){
+        if(inputText==null && appPreference.isClipBoardGetEnabled()){
         		inputText = clipboardHandler.getText();
-            }
         }
         
         if(inputText!=null){
@@ -172,11 +170,14 @@ public class ApertiumActivity extends Activity implements OnClickListener{
         Intent intent = getIntent();
         Bundle extras = intent.getExtras();
         if (extras != null) {
+        	//Getting input from ModeManageActivity and Widget Button
             String BundleMODE = extras.getString("Mode");
             if(BundleMODE!=null){
                 currentMode = BundleMODE;
             }
-             BundleMODE = extras.getString("input");
+            
+            //Gettting input from SMS Activity
+            BundleMODE = extras.getString("input");
             if(BundleMODE!=null){
             	inputText = BundleMODE;
             }
@@ -188,12 +189,12 @@ public class ApertiumActivity extends Activity implements OnClickListener{
     private void initView() {
         Log.i(TAG,"ApertiumActivityInitView Started");
         setContentView(R.layout.main_layout);
-        inputEditText       = (EditText) findViewById(R.id.inputtext);
+        outputTextView  = (TextView) findViewById(R.id.outputText);
+        inputEditText	= (EditText) findViewById(R.id.inputtext);
+        
         /**Giving priority to incoming text from intent over clipboardtext*/
-        if(inputText==null){
-        	if(appPreference.isClipBoardGetEnabled()){
+        if(inputText==null && appPreference.isClipBoardGetEnabled()){
         		inputText = clipboardHandler.getText();
-            }
         }
         
         if(inputText!=null){
@@ -201,7 +202,6 @@ public class ApertiumActivity extends Activity implements OnClickListener{
         }
 
         submitButton    = (Button) findViewById(R.id.translateButton);
-        outputTextView  = (TextView) findViewById(R.id.outputText);
         toButton        = (Button) findViewById(R.id.toButton);
         fromButton      = (Button) findViewById(R.id.fromButton);
         dirButton       = (Button) findViewById(R.id.modeSwitch);
@@ -362,7 +362,7 @@ public class ApertiumActivity extends Activity implements OnClickListener{
                         outputText  = Translator.translate(inputEditText.getText().toString());
                         
                         if(appPreference.isClipBoardPushEnabled()){
-                        clipboardHandler.putText(outputText);
+                        	clipboardHandler.putText(outputText);
                         }
                 
                     } catch (Exception e) {
@@ -439,13 +439,13 @@ public class ApertiumActivity extends Activity implements OnClickListener{
              
             final AlertDialog alertDialog = new AlertDialog.Builder(thisActivity).create();
             alertDialog.setTitle(R.string.crash_detect);
-            alertDialog.setMessage(getString(R.string.crash_message_with_error_and_support_address,crash,"arinkverma@gmail.com"));
+            alertDialog.setMessage(getString(R.string.crash_message_with_error_and_support_address,crash,AppPreference.SUPPORT_MAIL));
             
             alertDialog.setButton(getString(R.string.report), new DialogInterface.OnClickListener() {
                 public void onClick(final DialogInterface dialog, final int which) {  
                     Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND); 
                     emailIntent.setType("plain/text");
-                    String aEmailList[] = { "arinkverma@gmail.com" };     
+                    String aEmailList[] = { AppPreference.SUPPORT_MAIL };     
                     emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, aEmailList);    
                     emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Apertium Android Error Report");   
                     emailIntent.setType("plain/text");  
@@ -456,14 +456,10 @@ public class ApertiumActivity extends Activity implements OnClickListener{
             
             alertDialog.setButton2(getString(R.string.setting), new DialogInterface.OnClickListener() {
                 public void onClick(final DialogInterface dialog, final int which) {
-           
                     final Intent myIntent = new Intent(ApertiumActivity.this, ManageActivity.class);
                     ApertiumActivity.this.startActivity(myIntent);
-           
-             } });
-            
+            } });
             alertDialog.show();
-        
         }
     }
     
@@ -481,18 +477,24 @@ public class ApertiumActivity extends Activity implements OnClickListener{
      }
 
     public boolean onOptionsItemSelected(MenuItem item) {
-    	Intent myIntent = null;
+    	Intent intent = null;
         switch (item.getItemId()) {
             case R.id.manage:
-                myIntent = new Intent(ApertiumActivity.this, ManageActivity.class);
-                ApertiumActivity.this.startActivity(myIntent);
+                intent = new Intent(ApertiumActivity.this, ManageActivity.class);
+                startActivity(intent);
+                return true;
+            case R.id.clear:
+            	 inputEditText.setText("");
+            	 outputTextView.setText("");
+            	 inputText = "";
+            	 outputText = "";
                 return true;
             case R.id.share:
                 share_text();
                 return true;
             case R.id.inbox:
-                myIntent = new Intent(ApertiumActivity.this, SMSInboxActivity.class);
-                ApertiumActivity.this.startActivity(myIntent);
+                intent = new Intent(ApertiumActivity.this, SMSInboxActivity.class);
+                startActivityForResult(intent, 0);
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -507,6 +509,12 @@ public class ApertiumActivity extends Activity implements OnClickListener{
         sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Apertium Translate");
         sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, outputText);
         startActivity(Intent.createChooser(sharingIntent, getString(R.string.share_via)));
+    }
+    
+	@Override
+    public void onActivityResult(int requestCode,int resultCode,Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		inputText = data.getStringExtra("input");
     }
 
 }

@@ -25,6 +25,8 @@ public class AppPreference   {
 	public static final String MANIFEST_FILE  = "Manifest";
 	public static final String SVN_MANIFEST_ADDRESS = "http://apertium.svn.sourceforge.net/svnroot/apertium/builds/language-pairs";
 
+	public static final String SUPPORT_MAIL = "arinkverma@gmail.com";
+
 	//Preferences name
 	public static final String PREFERENCE_NAME = "ore.apertium.Pref";
 	

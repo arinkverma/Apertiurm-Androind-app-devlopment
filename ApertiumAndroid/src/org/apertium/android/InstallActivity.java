@@ -182,6 +182,7 @@ public class InstallActivity extends Activity implements OnClickListener {
 //Step 0 
 //Removing old files and data
 		private void RemoveOldRun(){		
+			progressDialog.setMessage(getString(R.string.removing_old));
 			Thread t = new Thread() {
 		        @Override
 		        public void run() {
