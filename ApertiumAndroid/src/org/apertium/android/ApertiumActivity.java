@@ -390,7 +390,7 @@ public class ApertiumActivity extends Activity implements OnClickListener{
             public void uncaughtException(Thread t, Throwable e) {
                 
                 Translator.clearCache();
-                String error = "["+e+"]";
+                String error = "["+e+"]\nTranslation direction: "+currentMode+"\n\n";
                 Log.e("Error", error);
                 appPreference.ReportCrash(error);
                 progressDialog.dismiss();
@@ -449,7 +449,7 @@ public class ApertiumActivity extends Activity implements OnClickListener{
                     emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, aEmailList);    
                     emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Apertium Android Error Report");   
                     emailIntent.setType("plain/text");  
-                    emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, "Error "+crash);  
+                    emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, "Error : "+crash);  
                     startActivity(Intent.createChooser(emailIntent, getString(R.string.send_email_in))); 
                     alertDialog.dismiss();         
              } });
