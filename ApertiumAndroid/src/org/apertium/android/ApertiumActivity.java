@@ -343,15 +343,14 @@ public class ApertiumActivity extends Activity implements OnClickListener{
         		Toast.makeText(getApplicationContext(), getString(R.string.no_mode_to), Toast.LENGTH_SHORT).show();
 	               
         	}else{
-	            String temp = fromLanguage;
-	            temp = databaseHandler.getModeID(toLanguage,fromLanguage);
-	            if(temp == null){
+        		String reverseMode = databaseHandler.getModeID(toLanguage,fromLanguage);
+	            if(reverseMode == null){
 	                Toast.makeText(getApplicationContext(), getString(R.string.no_mode_available,fromLanguage,toLanguage),   Toast.LENGTH_SHORT).show();              
 	            }else{
-	                temp = fromLanguage;
+	                String temp = fromLanguage;
 	                fromLanguage = toLanguage;
 	                toLanguage = temp;  
-	                currentMode = temp;
+	                currentMode = reverseMode;
 	                UpdateMode();
 	            }
         	}
