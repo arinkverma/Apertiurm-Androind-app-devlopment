@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.apertium.android"
-    android:versionCode="1"
-    android:versionName="2.4" >
+    android:versionCode="10"
+    android:versionName="2.4.2" >
 
     <uses-sdk android:minSdkVersion="7" 
           android:targetSdkVersion="10"
@@ -37,6 +37,13 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            
+			<intent-filter>
+				<action android:name="android.intent.action.SEND" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<data android:mimeType="text/plain" />
+			</intent-filter>
+			
         </activity>
         <activity android:name=".filemanager.FileChooserActivity"></activity>
         <activity android:name="ManageActivity" android:configChanges="orientation"

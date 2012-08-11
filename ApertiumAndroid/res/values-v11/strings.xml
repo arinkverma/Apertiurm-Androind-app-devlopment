@@ -8,8 +8,9 @@
 	<!-- Menu  -->
     <string name="manage">Manage</string>
     <string name="share">Share</string>
-    <string name="install">Install</string>
     <string name="clear">Clear</string>
+	<string name="inbox">Inbox</string>
+    
     
      <!-- Widgets  -->
     <string name="widgetAddButton">+</string>
@@ -22,6 +23,7 @@
     <string name="back">Back</string>   
     <string name="discard">Discard</string>
     <string name="from">&lt;from&gt;</string>
+    <string name="install">Install</string>
     <string name="no">No</string>
     <string name="ok">Okay</string>
     <string name="reinstall">Reinstall</string>
@@ -31,7 +33,7 @@
     <string name="to">&lt;to&gt;</string>
     <string name="translate">Translate</string>
     <string name="translate_from">Translate from</string>
-    <string name="translate_to">Translate to</string>
+    <string name="translate_to">Translated to</string>
     <string name="update">Update</string>
     <string name="yes">Yes</string>
     
@@ -45,24 +47,26 @@
 	<string name="downloading">Downloading</string>
 	<string name="error">Error</string>
 	<string name="error_removing_old">Cannot remove old package</string>
-	<string name="inbox">Inbox</string>
     <string name="invalid_jar">This is not a valid JAR package!</string>
     <string name="installing">Installing</string>
 	<string name="lastmodified">Lastmodified</string>
 	<string name="loading">Loading</string>
-	<string name="modes">Modes</string>
+	<string name="modes">Translation directions</string>
 	<string name="NA">Not Available</string>
-    <string name="no_mode_available">There is no mode from %1$s to %2$s</string>
+    <string name="no_mode_available">There is no language direction from %1$s to %2$s</string>
+    <string name="no_mode_from">Select language to be translate &lt;from&gt;</string>
+    <string name="no_mode_to">Select language to be translate &lt;to&gt;</string>
     <string name="package_Name">Package</string>
     <string name="package_list">Package List</string>
     <string name="removing_db">Removing database</string>
 	<string name="removing_files">Removing files</string>
 	<string name="removing_temp">Removing temporary files</string>
 	<string name="removing_old">Removing old files</string>
+	<string name="select_language_mode">Select languages to be translate</string>
     <string name="send_email_in">Send your email in:</string>
     <string name="share_via">Share via</string>
-    <string name="translator">Translator</string>
-	<string name="unziping">Unziping files</string>
+    <string name="translating">Translating</string>
+	<string name="unziping">Unzipping files</string>
 	<string name="updating_db">Updating database</string>
     <string name="working">Working</string>
 	<string name="writing_db">Writing database</string>

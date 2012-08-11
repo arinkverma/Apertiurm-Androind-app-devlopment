@@ -168,6 +168,19 @@ public class ApertiumActivity extends Activity implements OnClickListener{
 
     void getExtrasData(){
         Intent intent = getIntent();
+        
+        /** First look for shared from other apps */
+        String action = intent.getAction();
+        String type = intent.getType();
+        
+        if (Intent.ACTION_SEND.equals(action) && type != null) {
+            if ("text/plain".equals(type)) {
+            	inputText = intent.getStringExtra(Intent.EXTRA_TEXT);
+            	return;
+            } 
+        }
+        
+        /** Then look for data from clipboard **/
         Bundle extras = intent.getExtras();
         if (extras != null) {
         	//Getting input from ModeManageActivity and Widget Button
@@ -326,19 +339,22 @@ public class ApertiumActivity extends Activity implements OnClickListener{
             AlertDialog alert = builder.create();
             alert.show();
         }else if(v.equals(dirButton)){
-            String temp = fromLanguage;
-            fromLanguage = toLanguage;
-            toLanguage = temp;
-            temp = databaseHandler.getModeID(fromLanguage,toLanguage);
-            if(temp == null){
-                Toast.makeText(getApplicationContext(), getString(R.string.no_mode_available,fromLanguage,toLanguage),   Toast.LENGTH_SHORT).show();
-                temp = fromLanguage;
-                fromLanguage = toLanguage;
-                toLanguage = temp;                
-            }else{
-                currentMode = temp;
-                UpdateMode();
-            }
+        	if(toLanguage==null){
+        		Toast.makeText(getApplicationContext(), getString(R.string.no_mode_to), Toast.LENGTH_SHORT).show();
+	               
+        	}else{
+	            String temp = fromLanguage;
+	            temp = databaseHandler.getModeID(toLanguage,fromLanguage);
+	            if(temp == null){
+	                Toast.makeText(getApplicationContext(), getString(R.string.no_mode_available,fromLanguage,toLanguage),   Toast.LENGTH_SHORT).show();              
+	            }else{
+	                temp = fromLanguage;
+	                fromLanguage = toLanguage;
+	                toLanguage = temp;  
+	                currentMode = temp;
+	                UpdateMode();
+	            }
+        	}
         }
 
     }
@@ -347,7 +363,7 @@ public class ApertiumActivity extends Activity implements OnClickListener{
     /* Translation Thread,
      * Load translation rules and excute lttoolbox.jar */
     private void TranslationRun(){
-        progressDialog = ProgressDialog.show(this, getString(R.string.translator), getString(R.string.working),  true,true);
+        progressDialog = ProgressDialog.show(this, getString(R.string.translating), getString(R.string.working),  true,true);
         Thread t = new Thread() {
             @Override
             public void run() {
@@ -449,7 +465,7 @@ public class ApertiumActivity extends Activity implements OnClickListener{
                     emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, aEmailList);    
                     emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Apertium Android Error Report");   
                     emailIntent.setType("plain/text");  
-                    emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, "Error : "+crash);  
+                    emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, "Error : "+crash+"\nSDK Version :"+android.os.Build.VERSION.SDK_INT);  
                     startActivity(Intent.createChooser(emailIntent, getString(R.string.send_email_in))); 
                     alertDialog.dismiss();         
              } });

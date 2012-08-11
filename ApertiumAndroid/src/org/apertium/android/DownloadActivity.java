@@ -200,16 +200,16 @@ public class DownloadActivity extends Activity  implements OnClickListener{
 	        	listView.setAdapter(adapter);
 	        	listView.setTextFilterEnabled(true);
 	    	    //Set current mode on click
-	        	listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+	        	listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 	    	        @Override
-	    	        public boolean onItemLongClick(AdapterView<?> av, View view, int position, final long id) {
+	    	        public void onItemClick(AdapterView<?> av, View view, int position, final long id) {
 	    				TextView v = (TextView) view;
 	    				Toast.makeText(getApplicationContext(), v.getText(),   Toast.LENGTH_SHORT).show();
 	    				toDownload = internetManifest.get(position);
 						// start the download immediately
 	    			    startDownload();
 	    			    
-	    			    return true;
+	    			    return;
 	    			}
 	    	    });
 	     	    break;
