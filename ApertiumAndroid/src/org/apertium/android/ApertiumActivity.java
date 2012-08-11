@@ -508,9 +508,6 @@ public class ApertiumActivity extends Activity implements OnClickListener{
             case R.id.share:
                 share_text();
                 return true;
-            case R.id.inbox:
-                intent = new Intent(ApertiumActivity.this, SMSInboxActivity.class);
-                startActivityForResult(intent, 0);
             default:
                 return super.onOptionsItemSelected(item);
         }

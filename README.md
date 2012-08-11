@@ -3,7 +3,7 @@ Apertium on mobile
 Port Apertium to Android and possibly iPhone under Google Summer of Code 2012. Apertium has a Java port which doesn't currently work on mobile telephones. Lots of people have mobile telephones, and some of them would like to have a translator there.
 
 
-Features [version 2.4]
+Features [version 2.4.0 without SMS intregation]
 =========
 
 <b>Offline Translation</b>
@@ -12,7 +12,6 @@ Features [version 2.4]
 <ul>
 <li>Complete offline text translation</li>
 <li>Approx 2MB of language package</li>
-<li>Read text from SMS inbox as input for translatioon</li>
 
 </ul>
 
