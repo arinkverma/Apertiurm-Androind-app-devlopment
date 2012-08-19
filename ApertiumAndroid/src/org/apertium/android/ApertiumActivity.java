@@ -502,8 +502,9 @@ public class ApertiumActivity extends Activity implements OnClickListener{
     /****
      *  Option menu 
      *  1. share
-     *  2. setting
-     *  3. inbox*/
+     *  2. inbox
+     *  3. manage
+     *  4. setting*/
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.option_menu, menu);
@@ -513,6 +514,13 @@ public class ApertiumActivity extends Activity implements OnClickListener{
     public boolean onOptionsItemSelected(MenuItem item) {
     	Intent intent = null;
         switch (item.getItemId()) {
+	        case R.id.share:
+	            share_text();
+	            return true;
+	        case R.id.inbox:
+	            intent = new Intent(ApertiumActivity.this, SMSInboxActivity.class);
+	            startActivityForResult(intent, 0);
+	            return true;
             case R.id.manage:
                 intent = new Intent(ApertiumActivity.this, ManageActivity.class);
                 startActivity(intent);
@@ -522,9 +530,6 @@ public class ApertiumActivity extends Activity implements OnClickListener{
             	 outputTextView.setText("");
             	 inputText = "";
             	 outputText = "";
-                return true;
-            case R.id.share:
-                share_text();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

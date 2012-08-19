@@ -151,7 +151,7 @@ public class DatabaseHandler {
 		    	 
 		for(int i=0;i<LangList.size();i++){
 			TranslationMode m = LangList.get(i);
-			Log.e(TAG,m.getTitle());
+			Log.i(TAG,m.getTitle());
 			String []s = m.getTitle().split("\\s");
 			if(!TitleList.contains(s[0])){
 				TitleList.add(s[0]);
