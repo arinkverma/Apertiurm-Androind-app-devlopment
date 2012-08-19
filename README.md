@@ -50,7 +50,7 @@ Features [version 2.4.1]
 Links
 =====
 <ol>
-<li>http://apertium.org</li>
-<li>http://wiki.apertium.org/wiki/User:Arinkverma</li>
-<li>http://www.arinkverma.in/search/label/Apertium</li>
+<li>Documentation [http://wiki.apertium.org/wiki/Apertium_On_Mobile]</li>
+<li>Author [http://wiki.apertium.org/wiki/User:Arinkverma]</li>
+<li>Blog [http://www.arinkverma.in/search/label/Apertium]</li>
 </ol>

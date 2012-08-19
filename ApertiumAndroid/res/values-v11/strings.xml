@@ -62,7 +62,7 @@
 	<string name="removing_files">Removing files</string>
 	<string name="removing_temp">Removing temporary files</string>
 	<string name="removing_old">Removing old files</string>
-	<string name="select_language_mode">Select languages to be translate</string>
+	<string name="select_language_mode">Select languages to translate</string>
     <string name="send_email_in">Send your email in:</string>
     <string name="share_via">Share via</string>
     <string name="translating">Translating</string>

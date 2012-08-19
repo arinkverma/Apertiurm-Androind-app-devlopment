@@ -1,3 +1,22 @@
+/*
+ * Copyright (C) 2012 Arink Verma
+ * 
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+ * 02111-1307, USA.
+ */
+
 /**
  * ApertiumActivity.java
  * Main Launcher Activity of application
@@ -11,7 +30,7 @@ package org.apertium.android;
 import java.lang.Thread.UncaughtExceptionHandler;
 
 import org.apertium.Translator;
-import org.apertium.android.DB.DatabaseHandler;
+import org.apertium.android.database.DatabaseHandler;
 import org.apertium.android.filemanager.FileManager;
 import org.apertium.android.helper.AppPreference;
 import org.apertium.android.helper.ClipboardHandler;
@@ -343,17 +362,17 @@ public class ApertiumActivity extends Activity implements OnClickListener{
         		Toast.makeText(getApplicationContext(), getString(R.string.no_mode_to), Toast.LENGTH_SHORT).show();
 	               
         	}else{
-        		String reverseMode = databaseHandler.getModeID(toLanguage,fromLanguage);
-	            if(reverseMode == null){
-	                Toast.makeText(getApplicationContext(), getString(R.string.no_mode_available,fromLanguage,toLanguage),   Toast.LENGTH_SHORT).show();              
-	            }else{
-	                String temp = fromLanguage;
-	                fromLanguage = toLanguage;
-	                toLanguage = temp;  
-	                currentMode = reverseMode;
-	                UpdateMode();
-	            }
-        	}
+                String reverseMode = databaseHandler.getModeID(toLanguage,fromLanguage);
+                if(reverseMode == null){
+                    Toast.makeText(getApplicationContext(), getString(R.string.no_mode_available,fromLanguage,toLanguage),   Toast.LENGTH_SHORT).show();              
+                }else{
+                    String temp = fromLanguage;
+                    fromLanguage = toLanguage;
+                    toLanguage = temp;  
+                    currentMode = reverseMode;
+                    UpdateMode();
+                }
+            }
         }
 
     }
@@ -507,9 +526,6 @@ public class ApertiumActivity extends Activity implements OnClickListener{
             case R.id.share:
                 share_text();
                 return true;
-            case R.id.inbox:
-                intent = new Intent(ApertiumActivity.this, SMSInboxActivity.class);
-                startActivityForResult(intent, 0);
             default:
                 return super.onOptionsItemSelected(item);
         }
