@@ -12,7 +12,7 @@ Features [version 2.4.1]
 <ul>
 <li>Complete offline text translation</li>
 <li>Approx 2MB of language package</li>
-<li>Read text from SMS inbox as input for translatioon</li>
+<li>Read text from SMS inbox as input for translation</li>
 
 </ul>
 
@@ -41,7 +41,7 @@ Features [version 2.4.1]
 	<ul>
 <li>The cache feature developed by <a href="http://wiki.apertium.org/wiki/User:Mikel/GSoC_2012_Application">Mikel</a> on lttoolbox, has been added to application</li>
 <li>This make subsequent translation instantaneously</li>
-<li>Can easliy be enable/disable from setting panel</li>
+<li>Can easily be enable/disable from setting panel</li>
 <li>Clipboard push/get feature</li>
 <li>Friendly widget setting</li>
 </ul>
